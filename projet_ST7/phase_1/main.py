@@ -1,4 +1,5 @@
 from classes import TEmployee
+from classes import TTask
 from utils import *
 import csv
 from os.path import dirname, join
@@ -20,3 +21,8 @@ for index, row in employees_sheet.iterrows():
 
 
 
+<<<<<<< HEAD
+=======
+employee = TEmployee(1,1,1,1,1,1,1)
+task = TTask(1,1,1,1,1,1,1,1)
+>>>>>>> 2c2502501694dc3e202a1d6785780b08feb5ff51
