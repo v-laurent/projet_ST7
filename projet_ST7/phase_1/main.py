@@ -12,11 +12,15 @@ xls = pd.ExcelFile(file_path)
 
 #employees
 employees_sheet = pd.read_excel(xls, 'Employees')
+skillToRank = {skill : i for i,skill in enumerate( set(employees_sheet["Skill"]) )}
+skillToRank['other'] = len(skillToRank)
+
 employees = []
 for index, row in employees_sheet.iterrows():
     workingStartTime = dateToMinute( row["WorkingStartTime"] )
     workingEndTime = dateToMinute( row["WorkingEndTime"] )
-    employees.append( TEmployee(row["EmployeeName"], row["Latitude"], row["Longitude"], row["Skill"], row["Level"], workingStartTime, workingEndTime) )
+    skill = skillToRank[ row["Skill"] ]
+    employees.append( TEmployee(row["EmployeeName"], row["Latitude"], row["Longitude"], skill, row["Level"], workingStartTime, workingEndTime) )
 
 #tasks
 task_sheet = pd.read_excel(xls, 'Tasks')
@@ -24,7 +28,10 @@ tasks = []
 for index, row in task_sheet.iterrows():
     openingTime = dateToMinute( row["OpeningTime"] )
     closingTime = dateToMinute( row["ClosingTime"] )
-    tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], row["Skill"], row["Level"], openingTime, closingTime) )
+    if row["Skill"] in skillToRank.keys(): 
+        skill = skillToRank[ row["Skill"] ] 
+    else: skill = skillToRank["other"]
+    tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], skill, row["Level"], openingTime, closingTime) )
 
-print(tasks[0])
+
 
