@@ -35,3 +35,19 @@ def draw(latitude_list_list,longitude_list_list,task_numbers,name):
 
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
+
+def fichier_texte(DELTA,T,employees,number_of_tasks):
+    texte=open('bordeaux.txt','w')
+    #rajouter le cas ou la tache n est pas realisee
+    resultats=[['taskId','performed','employeeName','startTime']]
+
+    number_of_employees=len(employees)
+    for i in range(0,number_of_tasks+1): 
+        for j in range(0,number_of_tasks+1):
+            for k in range(1,number_of_employees+1):
+                if DELTA[(i,j,k)].x==1:
+                    if i!= 0:
+                        resultats.append([f'T{i}',1,employees[k-1].EmployeeName,T[(i,k)].x])
+    for line in (resultats):
+        texte.write("{};{};{};{};\n".format(line[0],line[1],line[2],line[3]))
+    print(resultats)
