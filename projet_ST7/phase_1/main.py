@@ -50,7 +50,7 @@ DELTA={(i,j,k): m.addVar(vtype=GRB.BINARY,name=f'DELTA_{i}_{j}_{k}')
     for k in range(1,number_of_employees+1)}
 
 T={(i,k): m.addVar(vtype=GRB.INTEGER,lb=480, ub=1440, name=f'T_{i}_{k}') 
-    for i in range(1,number_of_tasks+1) 
+    for i in range(0,number_of_tasks+1) 
     for k in range(1,number_of_employees+1)}
 
 #Definition des variables utiles pour la modelisation du probleme
@@ -92,7 +92,8 @@ M=1440
 for k in range(1,len(employees)+1):
     for j in range(1,len(tasks)+1):
         for i in range(1,len(tasks)+1):
-            print("trajet{}{}".format(i-1,j-1),trajet(tasks[i-1],tasks[j-1]))
+            print("Départ", tasks[i-1].TaskId, "arrivée", tasks[j-1].TaskId)
+            print(trajet(tasks[i-1],tasks[j-1]),'minutes')
             Unique_task_constr[(i,j,k)]=m.addConstr(T[(j,k)]>=T[(i,k)]+t[i]+trajet(tasks[i-1],tasks[j-1])-(1-DELTA[(i,j,k)])*M,name=f'Unique_{i}_{j}_{k}')
 
 Available_task_constr_sup=dict()
@@ -119,7 +120,7 @@ Start_employee=dict()
 for k in range(1,len(employees)+1):
     Start_employee[k]=m.addConstr(quicksum(DELTA[(0,j,k)]
                                     for j in range(1,len(tasks)+1))==1)
-                                    
+                                   
 End_employee=dict()
 for k in range(1,len(employees)+1):
     End_employee[k]=m.addConstr(    quicksum(DELTA[(i,0,k)] 
@@ -159,3 +160,5 @@ for k in range(1,len(employees)+1):
     longitudes[k-1].append(employees[k-1].Longitude)
     task_numbers[k-1].append(0)
 draw(latitudes,longitudes,task_numbers,'bordeauxtest')
+
+fichier_texte(DELTA,T,employees,number_of_tasks)
