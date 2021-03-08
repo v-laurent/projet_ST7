@@ -1,25 +1,16 @@
 import math
 import gmplot
-from math import sin, cos,sqrt,atan2,radians
+from math import sin, cos,sqrt,atan2,radians,acos,asin
 
+#rayon de la terre en m
+R = 6371000
 
-def distance(depart,arrivee):
-    lat1=depart.Latitude
-    lat2=arrivee.Latitude
-    lon1=depart.Longitude
-    lon2=arrivee.Longitude
-    lat1=radians(lat1)
-    lat2=radians(lat2)
-    lon1=radians(lon1)
-    lon2=radians(lon2)
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-
-    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    R=6371000
+def distance(A,B):    
+    ALatitude, ALongitude = radians(A.Latitude), radians(A.Longitude)
+    BLatitude, BLongitude = radians(B.Latitude), radians(B.Longitude)
+    a = sin( (BLatitude - ALatitude) / 2)**2 + cos(ALatitude)*cos(BLatitude)*sin( (BLongitude - ALongitude) / 2)**2
+    c = 2*asin(sqrt(a))
     distance = R * c
-
     return distance
 
 def dateToMinute(date):
