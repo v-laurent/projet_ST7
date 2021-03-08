@@ -148,5 +148,5 @@ for k in range(1,len(employees)+1):
     latitudes[k-1].append(employees[k-1].Latitude)
     longitudes[k-1].append(employees[k-1].Longitude)
     task_numbers[k-1].append(0)
-draw(latitudes,longitudes,task_numbers,'bordeauxtest')
+draw(latitudes,longitudes,task_numbers,'bordeauxtest',DELTA)
 fichier_texte(DELTA,T,employees,number_of_tasks,'bordeaux')
