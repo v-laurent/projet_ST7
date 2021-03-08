@@ -66,9 +66,11 @@ for task1 in range(1,number_of_tasks+1):
                       
 
 Unique_task_constr=dict()
+Start_task_constr=dict()
 M=1440
 for k in range(1,len(employees)+1):
     for j in range(1,len(tasks)+1):
+        Start_task_constr[(j,k)]=m.addConstr(T[(j,k)]>=employees[k-1].WorkingStartTime+trajet(employees[k-1],tasks[j-1])-(1-DELTA[(0,j,k)])*M, name=f'Start_task_constr_{j}_{k}')
         for i in range(1,len(tasks)+1):
             print("trajet{}{}".format(i-1,j-1),trajet(tasks[i-1],tasks[j-1]))
             Unique_task_constr[(i,j,k)]=m.addConstr(T[(j,k)]>=T[(i,k)]+t[i]+trajet(tasks[i-1],tasks[j-1])-(1-DELTA[(i,j,k)])*M,name=f'Unique_{i}_{j}_{k}')
@@ -128,8 +130,18 @@ for k in range(1,len(employees)+1):
     for i in range(0,len(tasks)+1):
         for j in range(0,len(tasks)+1):
             if DELTA[(i,j,k)].x==1:
-                if i!=0:
-                    print("distance{}{}".format(i,j),distance(tasks[i-1],tasks[j-1]))
+                if i!=0 and j!=0:
+                    print("distance{}-{}".format(i,j),distance(tasks[i-1],tasks[j-1]))
+                    latitudes[k-1].append(tasks[i-1].Latitude)
+                    longitudes[k-1].append(tasks[i-1].Longitude)
+                    task_numbers[k-1].append(i)
+                elif i==0 and j!=0:
+                    print("distance{}-{}".format(i,j),distance(employees[k-1],tasks[j-1]),"distance au depot")
+                    latitudes[k-1].append(employees[k-1].Latitude)
+                    longitudes[k-1].append(employees[k-1].Longitude)
+                    task_numbers[k-1].append(i)
+                elif j==0 and i!=0:
+                    print("distance{}-{}".format(i,j),distance(tasks[i-1],employees[k-1]),"distance au depot")
                     latitudes[k-1].append(tasks[i-1].Latitude)
                     longitudes[k-1].append(tasks[i-1].Longitude)
                     task_numbers[k-1].append(i)
@@ -137,3 +149,4 @@ for k in range(1,len(employees)+1):
     longitudes[k-1].append(employees[k-1].Longitude)
     task_numbers[k-1].append(0)
 draw(latitudes,longitudes,task_numbers,'bordeauxtest')
+fichier_texte(DELTA,T,employees,number_of_tasks,'bordeaux')

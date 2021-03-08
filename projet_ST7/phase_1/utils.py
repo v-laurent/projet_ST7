@@ -23,7 +23,7 @@ colors=['black','red','green','blue','yellow','cyan','orange','slategray','lemon
 color_code=dict()
 color_code={i:color for (i,color) in enumerate(colors)}
 
-def draw(latitude_list_list,longitude_list_list,task_numbers,name):
+def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA):
     mean_latitude=sum(latitude_list_list[0])/len(latitude_list_list[0])
     mean_longitude=sum(longitude_list_list[0])/len(longitude_list_list[0])
     gmap1 = gmplot.GoogleMapPlotter(mean_latitude, mean_longitude,  13 )
@@ -36,8 +36,8 @@ def draw(latitude_list_list,longitude_list_list,task_numbers,name):
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
-def fichier_texte(DELTA,T,employees,number_of_tasks):
-    texte=open('bordeaux.txt','w')
+def fichier_texte(DELTA,T,employees,number_of_tasks,titre):
+    texte=open(f'{titre}.txt','w')
     #rajouter le cas ou la tache n est pas realisee
     resultats=[['taskId','performed','employeeName','startTime']]
 
