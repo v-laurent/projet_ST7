@@ -67,7 +67,7 @@ M=1440
 for k in range(1,number_of_employees):
     for j in range(1,number_of_tasks):
         for i in range(0,number_of_tasks):
-            #print("trajet{}{}".format(i-1,j-1),trajet(tasks[i-1],tasks[j-1]))
+            #print("trajet{}{}".format(i,j),trajet(tasks[i],tasks[j]))
             Unique_task_constr[(i,j,k)]=m.addConstr(T[(j,k)]>=T[(i,k)]+t[i]+trajet(tasks[i],tasks[j])-(1-DELTA[(i,j,k)])*M,name=f'Unique_{i}_{j}_{k}')
 
 Available_task_constr_sup=dict()
