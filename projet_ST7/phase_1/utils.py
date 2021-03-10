@@ -18,7 +18,7 @@ instance = "1"
 def distance(A,B):    
     ALatitude, ALongitude = radians(A.Latitude), radians(A.Longitude)
     BLatitude, BLongitude = radians(B.Latitude), radians(B.Longitude)
-    a = sin( (BLatitude - ALatitude) / 2)**2 + cos(ALatitude)*cos(BLatitude)*sin( (BLongitude - ALongitude) / 2)**2
+    a = sin((BLatitude - ALatitude)/2)**2 + cos(ALatitude)*cos(BLatitude)*sin((BLongitude - ALongitude)/2)**2
     c = 2*asin(sqrt(a))
     distance = R * c
     return distance
@@ -57,7 +57,7 @@ def fichier_texte(DELTA,T,employees,number_of_tasks,country,phase=phase,instance
     if not os.path.exists(directory):
         os.makedirs(directory)
     os.chdir(directory)
-    titre = "Solution"+country+"V"+instance+"V"+phase
+    titre = "Solution"+country+"V"+instance+"ByV"+phase
     texte=open(f'{titre}.txt','w')
     #rajouter le cas ou la tache n est pas realisee
     resultats=[['taskId','performed','employeeName','startTime']]
