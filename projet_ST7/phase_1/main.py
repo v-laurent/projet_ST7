@@ -15,9 +15,10 @@ from gurobipy import *
 
 ##***************************** Reading Data 
 
-employees, tasks = readingData("Bordeaux")
+country = "Poland"
+employees, tasks = readingData(country)
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
-depot = TTask(0,employees[0].Latitude, employees[0].Longitude, 0, None, 0,480,1440)
+depot = TTask(0,employees[0].Latitude, employees[0].Longitude, 0, 0, 0,480,1440)
 employees = [None] + employees
 tasks = [depot] + tasks
     
@@ -41,17 +42,17 @@ for k in range(1,number_of_employees+1):
         for j in T_indices:
             if DELTA[(i,j,k)]==1:
                 if i!=0 and j!=0:
-                    print("distance{}-{}".format(i,j),int(distance(tasks[i],tasks[j])))
+                    #print("distance{}-{}".format(i,j),int(distance(tasks[i],tasks[j])))
                     latitudes[k].append(tasks[i].Latitude)
                     longitudes[k].append(tasks[i].Longitude)
                     task_numbers[k].append(i)
                 elif i==0 and j!=0:
-                    print("distance{}-{}".format(i,j),int(distance(employees[k],tasks[j])),"distance au depot")
+                    #print("distance{}-{}".format(i,j),int(distance(employees[k],tasks[j])),"distance au depot")
                     latitudes[k].append(employees[k].Latitude)
                     longitudes[k].append(employees[k].Longitude)
                     task_numbers[k].append(i)
                 elif j==0 and i!=0:
-                    print("distance{}-{}".format(i,j),int(distance(tasks[i],employees[k])),"distance au depot")
+                    #print("distance{}-{}".format(i,j),int(distance(tasks[i],employees[k])),"distance au depot")
                     latitudes[k].append(tasks[i].Latitude)
                     longitudes[k].append(tasks[i].Longitude)
                     task_numbers[k].append(i)
@@ -59,5 +60,5 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-draw(latitudes,longitudes,task_numbers,'bordeauxtest',DELTA)
-fichier_texte(DELTA,T,employees,number_of_tasks,'bordeaux')
+draw(latitudes,longitudes,task_numbers,country+'test.html',DELTA)
+fichier_texte(DELTA,T,employees,tasks,country)
