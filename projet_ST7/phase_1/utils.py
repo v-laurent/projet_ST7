@@ -1,9 +1,14 @@
 import math
 import gmplot
 from math import sin, cos,sqrt,atan2,radians,acos,asin
+import os
 
 #rayon de la terre en m
 R = 6371000
+## Phase du projet ##
+phase = "phase1" 
+#phase = "phase2"
+#phase = "phase3"
 
 def distance(A,B):    
     ALatitude, ALongitude = radians(A.Latitude), radians(A.Longitude)
@@ -36,7 +41,12 @@ def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA):
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
-def fichier_texte(DELTA,T,employees,number_of_tasks,titre):
+def fichier_texte(DELTA,T,employees,number_of_tasks,titre,phase=phase):
+    directory = os.getcwd()
+    directory = directory + phase
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    os.getcwd(directory)
     texte=open(f'{titre}.txt','w')
     #rajouter le cas ou la tache n est pas realisee
     resultats=[['taskId','performed','employeeName','startTime']]
