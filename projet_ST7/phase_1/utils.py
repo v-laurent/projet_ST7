@@ -21,6 +21,7 @@ def distance(A,B):
 def dateToMinute(date):
     pm = (date[-2:] == 'pm')
     h,m = map(int, date[:-2].split(":") )
+    pm = pm and (h!=12)
     return 12*60*pm + 60*h + m
 
 
@@ -41,7 +42,7 @@ def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA):
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
-def fichier_texte(DELTA,T,employees,number_of_tasks,titre,phase=phase):
+def fichier_texte(DELTA,T,employees,tasks,titre):
     directory = os.path.realpath(__file__)
     directory = directory + '_'+ phase
     if not os.path.exists(directory):
@@ -51,13 +52,15 @@ def fichier_texte(DELTA,T,employees,number_of_tasks,titre,phase=phase):
     #rajouter le cas ou la tache n est pas realisee
     resultats=[['taskId','performed','employeeName','startTime']]
 
-    number_of_employees=len(employees)
-    for i in range(0,number_of_tasks): 
-        for j in range(0,number_of_tasks):
-            for k in range(1,number_of_employees):
-                if DELTA[(i,j,k)].x==1:
+    number_of_employees=len(employees)-1
+    number_of_tasks=len(tasks)-1
+
+    for i in range(0,number_of_tasks+1): 
+        for j in range(0,number_of_tasks+1):
+            for k in range(1,number_of_employees+1):
+                if DELTA[(i,j,k)]==1:
                     if i!= 0:
-                        resultats.append([f'T{i}',1,employees[k].EmployeeName,T[(i,k)].x])
+                        resultats.append([f'T{i}',1,employees[k].EmployeeName,T[(k,i)]])
     for line in (resultats):
         texte.write("{};{};{};{};\n".format(line[0],line[1],line[2],line[3]))
     print(resultats)

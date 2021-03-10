@@ -14,9 +14,10 @@ def readingData(country):
     employees_sheet = pd.read_excel(xls, 'Employees')
     skillToRank = {skill : i for i,skill in enumerate( set(employees_sheet["Skill"]) )}
     skillToRank['other'] = len(skillToRank)
-
     employees = []
+    
     for index, row in employees_sheet.iterrows():
+        print(index,row)
         workingStartTime = dateToMinute( row["WorkingStartTime"] )
         workingEndTime = dateToMinute( row["WorkingEndTime"] )
         skill = skillToRank[ row["Skill"] ]
