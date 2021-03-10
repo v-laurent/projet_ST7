@@ -15,7 +15,7 @@ from gurobipy import *
 
 ##***************************** Reading Data 
 
-country = "Poland"
+country = "Bordeaux"
 employees, tasks = readingData(country)
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
 depot = TTask(0,employees[0].Latitude, employees[0].Longitude, 0, 0, 0,480,1440)

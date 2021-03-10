@@ -46,11 +46,11 @@ def verification(country, epsilon=1):
         
         # 2- disponibilité des employés
         if T_i_startTime < employees[k].WorkingStartTime:
-            print(f"ERREUR 2.1 : tâche {task_id} réalisée par {employee_name} avant le début de son service.")
+            print(f"ERREUR 2.1 : {employee_name} réalise la tâche {task_id} avant le début de son service.")
         if T_i_startTime > employees[k].WorkingEndTime:
-            print(f"ERREUR 2.2 : tâche {task_id} réalisée par {employee_name} après la fin de son service.")
+            print(f"ERREUR 2.2 : {employee_name} réalise la tâche {task_id} après la fin de son service.")
         if T_i_startTime > employees[k].WorkingEndTime - tasks[i].TaskDuration - trajet(tasks[i],employees[k]):
-            print(f"ERREUR 2.3 : tâche {task_id} réalisée par {employee_name} trop proche de la fin de son service.")
+            print(f"ERREUR 2.3 : {employee_name} réalise la tâche {task_id} trop proche de la fin de son service.")
 
         # 3- compétences
         if employees[k].Skill != tasks[i].Skill:
