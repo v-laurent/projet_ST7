@@ -5,7 +5,7 @@ from utils import *
 from reading_data import *
 
 
-def verification(country):
+def verification(country, epsilon=1):
     employees,tasks = readingData(country)          # le dépôt n'est pas dans les tâches
     number_of_employees = len(employees)
     number_of_tasks = len(tasks)
@@ -20,6 +20,13 @@ def verification(country):
     for i in range(0, number_of_tasks):
         task_id = tasks[i].TaskId
         T_i_startTime = decision[decision['taskId']==task_id].loc[:,'startTime'].values
+        # vérification que la tâche Ti est faite
+        if len(decision[decision['taskId']==task_id].loc[:,'performed'].values) == 0:
+            print(f"ERREUR : ligne de la tâche {task_id} manquante")
+            break
+        if decision[decision['taskId']==task_id].loc[:,'performed'].values == 0:
+            print(f"Tâche {task_id} non réalisée")
+            break
         employee_name = decision[decision['taskId']==task_id].loc[:,'employeeName'].values[0]
         k=0
         while employees[k].EmployeeName != employee_name:
@@ -52,22 +59,25 @@ def verification(country):
         employee_name = employees[k].EmployeeName
         tasks_id = decision[decision['employeeName']==employee_name].loc[:,'taskId'].values
         tasks_startTime = decision[decision['employeeName']==employee_name].loc[:,'startTime'].values
+        if len(tasks_startTime) == 0:
+            print(f"{employee_name} n'effectue aucune tâche")
+            break
         sorted_indices = np.argsort(tasks_startTime)        # indices uniquement des tâches effectuées par le technicien k
         sorted_indices_bis = []                             # utilisables sur tasks (ensemble de toutes les tâches)
         for i in sorted_indices:
             for j in range(number_of_tasks):
                 if tasks[j].TaskId == tasks_id[i]:
-                    sorted_indices_bis.append(j)
+                    sorted_indices_bis.append(j)   
 
         # 4- trajet dépôt / première tâche
         i0 = sorted_indices[0]
         i0_bis = sorted_indices_bis[0]
-        if tasks_startTime[i0] < employees[k].WorkingStartTime + trajet(employees[k], tasks[i0_bis]):
+        eps = tasks_startTime[i0] - (employees[k].WorkingStartTime + trajet(employees[k], tasks[i0_bis]))
+        if eps < 0:
             print(f"ERREUR 4.1 : {employee_name} part du dépôt trop tôt")
         else:
-            eps = tasks_startTime[i0] - (employees[k].WorkingStartTime + trajet(employees[k], tasks[i0_bis]))
-            if eps > 0:
-                print(f"ERREUR 4.2 : {employee_name} part du dépôt {round(eps,2)}min trop tard")
+            if eps > epsilon:
+                print(f"warning 4.2 : {employee_name} part du dépôt {round(eps,2)}min trop tard")
         
         # 5- temporalité des tâches
         for i in range(1,len(sorted_indices)):
@@ -75,19 +85,19 @@ def verification(country):
             i2 = sorted_indices[i]
             i1_bis = sorted_indices_bis[i-1]
             i2_bis = sorted_indices_bis[i]
-            if tasks_startTime[i2] < tasks_startTime[i1] + tasks[i1_bis].TaskDuration + trajet(tasks[i1_bis],tasks[i2_bis]):
+            eps = tasks_startTime[i2] - (tasks_startTime[i1] + tasks[i1_bis].TaskDuration + trajet(tasks[i1_bis],tasks[i2_bis]))
+            if eps < 0:
                 print(f"ERREUR 5.1 : {employee_name} commence la tâche {tasks_id[i2]} trop tôt par rapport à la tâche précédente {tasks_id[i1]}")            
             else:
-                eps = tasks_startTime[i2] - (tasks_startTime[i1] + tasks[i1_bis].TaskDuration + trajet(tasks[i1_bis],tasks[i2_bis]))
-                if eps !=0:
-                    print(f"ERREUR 5.2 : {employee_name} met {round(eps,2)}min de trop pour aller de la tâche {tasks_id[i2]} à la tâche {tasks_id[i1]}")
+                if eps > epsilon:
+                    print(f"warning 5.2 : {employee_name} met {round(eps,2)}min de trop pour aller de la tâche {tasks_id[i2]} à la tâche {tasks_id[i1]}")
 
         # 6- trajet dernièrer tâche / dépôt
         iN = sorted_indices[-1]
         iN_bis = sorted_indices_bis[-1]
         if tasks_startTime[iN] > employees[k].WorkingEndTime - trajet(tasks[iN_bis], employees[k]):
             print(f"ERREUR 6.1 : {employee_name} revient au dépôt trop tard")
-        
 
 
-verification("bordeaux")
+
+verification("Poland")

@@ -13,7 +13,7 @@ from gurobipy import *
 
 ##***************************** Reading Data 
 
-employees, tasks = readingData("Bordeaux")
+employees, tasks = readingData("Poland")
 task_depot = [TTask(0, employees[0].Latitude, employees[0].Longitude, 0, 0, 0, 480, 1440)] 
 tasks = task_depot + tasks
 employees = [None] + employees
@@ -28,11 +28,11 @@ m=Model('PL_phase_1')
 DELTA={(i,j,k): m.addVar(vtype=GRB.BINARY,name=f'DELTA_{i}_{j}_{k}') 
     for i in range(0,number_of_tasks)
     for j in range(0,number_of_tasks)
-    for k in range(1,number_of_employees+1)}
+    for k in range(1,number_of_employees)}
 
 T={(i,k): m.addVar(vtype=GRB.INTEGER,lb=480, ub=1440, name=f'T_{i}_{k}') 
     for i in range(0,number_of_tasks) 
-    for k in range(1,number_of_employees+1)}
+    for k in range(1,number_of_employees)}
 
 #Definition des variables utiles pour la modelisation du probleme
 d={(i,j,k): distance(tasks[i],tasks[j]) for i in range(0,number_of_tasks) for j in range(0,number_of_tasks) for k in range(1,number_of_employees)}
