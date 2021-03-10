@@ -50,7 +50,7 @@ def best_solution(employees,tasks):
     avaibility_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
                                 for i in range(number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
-    #pas sur sur
+
     avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - (3.6/(50*60)) * d[(i,0)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
