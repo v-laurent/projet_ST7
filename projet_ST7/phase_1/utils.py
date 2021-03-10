@@ -43,10 +43,10 @@ def trajet(depart,arrivee):
 
 def fichier_texte(DELTA,T,employees,number_of_tasks,titre,phase=phase):
     directory = os.getcwd()
-    directory = directory + phase
+    directory = directory + '_'+ phase
     if not os.path.exists(directory):
         os.makedirs(directory)
-    os.getcwd(directory)
+    os.chdir(directory)
     texte=open(f'{titre}.txt','w')
     #rajouter le cas ou la tache n est pas realisee
     resultats=[['taskId','performed','employeeName','startTime']]

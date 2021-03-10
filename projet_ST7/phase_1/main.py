@@ -12,8 +12,8 @@ import random
 from gurobipy import *
 
 ##***************************** Reading Data 
-
-employees, tasks = readingData("Poland")
+country = "Bordeaux"
+employees, tasks = readingData(country)
 task_depot = [TTask(0, employees[0].Latitude, employees[0].Longitude, 0, 0, 0, 480, 1440)] 
 tasks = task_depot + tasks
 employees = [None] + employees
@@ -22,7 +22,7 @@ number_of_tasks = len(tasks)
 
 ##***************************** Model 
 
-m=Model('PL_phase_1')
+m=Model('PL_phase_1_'+country)
 
 #Definition des variables de decision, en majuscules
 DELTA={(i,j,k): m.addVar(vtype=GRB.BINARY,name=f'DELTA_{i}_{j}_{k}') 
@@ -147,5 +147,5 @@ for k in range(1,number_of_employees):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-draw(latitudes,longitudes,task_numbers,'bordeauxtest',DELTA)
-fichier_texte(DELTA,T,employees,number_of_tasks,'bordeaux')
+draw(latitudes,longitudes,task_numbers,country+"_gmplot",DELTA)
+fichier_texte(DELTA,T,employees,number_of_tasks,country)
