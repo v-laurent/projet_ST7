@@ -4,13 +4,18 @@ from classes import *
 from utils import *
 from reading_data import *
 
+######################################
+country = 'Bordeaux'
+dossier_txt = 'utils.py_phase1'
+######################################
+
 
 def verification(country, epsilon=1):
     employees,tasks = readingData(country)          # le dépôt n'est pas dans les tâches
     number_of_employees = len(employees)
     number_of_tasks = len(tasks)
 
-    decision = pd.read_csv(f"{country}.txt", sep=';')
+    decision = pd.read_csv(f"{dossier_txt}/{country}.txt", sep=';')
     decision = decision[['taskId','performed','employeeName','startTime']]
 
     # Pourcentage de tâches réalisées
@@ -100,4 +105,4 @@ def verification(country, epsilon=1):
 
 
 
-verification("Poland")
+verification(country)

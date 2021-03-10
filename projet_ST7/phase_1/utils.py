@@ -42,7 +42,7 @@ def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
 def fichier_texte(DELTA,T,employees,number_of_tasks,titre,phase=phase):
-    directory = os.path.dirname(os.path.realpath(__file__))
+    directory = os.path.realpath(__file__)
     directory = directory + '_'+ phase
     if not os.path.exists(directory):
         os.makedirs(directory)
