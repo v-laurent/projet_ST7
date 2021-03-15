@@ -3,6 +3,7 @@
 #Modules de structure
 from classes import *
 from utils import *
+from test import *
 from reading_data import *
 from model import *
 
@@ -16,7 +17,8 @@ from gurobipy import *
 ##***************************** Reading Data 
 
 country = "Bordeaux"
-employees, tasks = readingData(country)
+#employees, tasks = readingData(country)
+employees, tasks = extract_data_Anouar(country)
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
 depot = TTask(0,employees[0].Latitude, employees[0].Longitude, 0, 0, 0,480,1440)
 employees = [None] + employees

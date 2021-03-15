@@ -4,6 +4,7 @@ from gurobipy import *
 
 def best_solution(employees,tasks):
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
+    
     #model
     m = Model('PL_phase_1')
 
@@ -32,7 +33,7 @@ def best_solution(employees,tasks):
 
     #temporal constraints
     oo = 1440
-    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j)] -(1-DELTA[(i,j,k)])*oo, name=f'temporal_constr_{k}_{i}_{j}')
+    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration + (3.6/(50*60)) * d[(i,j)]-(1-DELTA[(i,j,k)])*oo, name=f'temporal_constr_{k}_{i}_{j}')
                             for i in range(number_of_tasks+1)
                             for j in range(1,number_of_tasks+1)
                             for k in range(1,number_of_employees+1) }
@@ -50,8 +51,8 @@ def best_solution(employees,tasks):
     avaibility_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
                                 for i in range(number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
-
-    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - (3.6/(50*60)) * d[(i,0)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
+    #
+    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration , name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
 
@@ -63,11 +64,11 @@ def best_solution(employees,tasks):
                     }
     #beginning at the depot
     beginning_constr = {k : m.addConstr( quicksum([ DELTA[(0,j,k)] for j in range(number_of_tasks+1) ]) == 1, name = f'beginning_{k}')
-                            for k in range(1, number_of_employees+1)} 
+                            for k in range(1, number_of_employees)} 
 
     #ending at the depot
     ending_constr = {k : m.addConstr( quicksum([ DELTA[(i,0,k)] for i in range(number_of_tasks+1) ]) == 1, name = f'beginning_{k}')
-                            for k in range(1, number_of_employees+1)}    
+                            for k in range(1, number_of_employees)}    
 
     #flow constraint
     flow_constr = {(k,t) : m.addConstr( quicksum( [DELTA[(i,t,k)] for i in range(number_of_tasks+1)] ) == quicksum( [DELTA[(t,j,k)] for j in range(number_of_tasks+1)] ), name=f'flow_{k}_{t}')
