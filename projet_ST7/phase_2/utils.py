@@ -71,4 +71,4 @@ def fichier_texte(DELTA,T,employees,number_of_tasks,country,phase=phase,instance
                         resultats.append([f'T{i}',1,employees[k].EmployeeName,T[(k,i)]])
     for line in (resultats):
         texte.write("{};{};{};{};\n".format(line[0],line[1],line[2],line[3]))
-    print(resultats)
+    print(resultats) 

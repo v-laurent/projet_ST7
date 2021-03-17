@@ -18,13 +18,24 @@ from gurobipy import *
 country = "Bordeaux"
 employees, tasks = readingData(country)
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
-depot = TTask(0,employees[0].Latitude, employees[0].Longitude, 0, 0, 0,480,1440)
-employees = [None] + employees
-tasks = [depot] + tasks
+depots = [TTask(0,employees[k].Latitude, employees[k].Longitude, 0, 0,"",480,1440,[],0,k)
+        for k in range(1,number_of_employees+1)]
+def sous_taches(Tasks):
+    NewTasks=[]
     
+employees_unavailability=[]
+for k in range(1,number_of_employees+1):
+    if len(employees[k].Unavalaibilities)!=0: #if the employee has unavailabilities
+        employees_unavailability.append(TTask(-1,employees[k].Unavalaibilities[0].Latitude, employees[k].Unavailabilies[0].Longitude, 
+                        employees[k].Unavalaibilities[0].ClosingTime-employees[k].Unavalaibilities[0].ClosingTime,
+                        0,"",employees[k].Unavalaibilities[0].OpeningTime, employees[k].Unavalaibilities[0].ClosingTime,
+                        [],k))
+
+new_tasks = [None]+ [depots] + tasks
+
 ##***************************** Model 
 
-DELTA, T = best_solution(employees,tasks)
+DELTA, T = best_solution(employees,new_tasks)
 
 ##****************************   plot 
 

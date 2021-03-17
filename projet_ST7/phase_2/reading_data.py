@@ -7,7 +7,7 @@ from classes import *
 def readingData(country):
 
     current_dir = dirname(__file__)
-    file_path = current_dir + "/InstancesV1/Instance" + country + "V1.xlsx"
+    file_path = current_dir + "/InstancesV2/Instance" + country + "V2.xlsx"
     xls = pd.ExcelFile(file_path)
 
     #employees
