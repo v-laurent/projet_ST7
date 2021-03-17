@@ -59,5 +59,3 @@ def readingData(country):
     
     
     return employees, tasks
-employees,tasks=readingData("Bordeaux")
-print(employees[0])

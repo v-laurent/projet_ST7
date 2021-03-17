@@ -26,6 +26,8 @@ def distance(A,B):
 def dateToMinute(date):
     pm = (date[-2:] == 'pm')
     h,m = map(int, date[:-2].split(":") )
+    if pm and h==12:
+        return 12*60+m
     return 12*60*pm + 60*h + m
 
 
