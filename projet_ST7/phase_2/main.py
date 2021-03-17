@@ -15,7 +15,7 @@ from gurobipy import *
 
 ##***************************** Reading Data 
 
-country = "Poland"
+country = "Austria"
 employees, tasks = readingData(country)
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
 depots = [TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440,[],0,k)
@@ -23,6 +23,12 @@ depots = [TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440,
 def sous_taches(tasks):
     new_tasks=[]
     for i in range(1,number_of_tasks):
+        number_of_sisters=len(tasks[i].Unavailabilities)
+        for unava in range(len(tasks[i].Unavailabilities)):
+            if tasks[i].Unavailabilities[unava].End >= tasks[i].ClosingTime:
+                number_of_sisters-=1
+            if tasks[i].Unavailabilities[unava].Start == tasks[i].OpeningTime:
+                number_of_sisters-=1
         if len(tasks[i].Unavailabilities)==0:
             print(tasks[i].TaskId)
             new_tasks.append(tasks[i])
@@ -32,7 +38,7 @@ def sous_taches(tasks):
             if tasks[i].Unavailabilities[0].Start != 8*60:
                 new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
                                 tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
-                                start, end, [],len(tasks[i].Unavailabilities))) 
+                                start, end, [],number_of_sisters)) 
             if end==tasks[i].ClosingTime:
                 continue
             for sous_tache in range(len(tasks[i].Unavailabilities)):
@@ -44,7 +50,7 @@ def sous_taches(tasks):
                 if end>start:
                     new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
                             tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
-                            start, end, [],len(tasks[i].Unavailabilities)))
+                            start, end, [], number_of_sisters))
                 if end == tasks[i].ClosingTime:
                     break
 
@@ -62,7 +68,7 @@ for k in range(1,number_of_employees):
         employees_unavailability.append(0)
 
 new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
-print(new_tasks[4+15])
+print(new_tasks[13+30])
 ##***************************** Model 
 
 #DELTA, T = best_solution(employees,new_tasks)
