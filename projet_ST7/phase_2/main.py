@@ -24,23 +24,30 @@ def sous_taches(tasks):
     new_tasks=[]
     for i in range(1,number_of_tasks):
         if len(tasks[i].Unavailabilities)==0:
+            print(tasks[i].TaskId)
             new_tasks.append(tasks[i])
         else:
             start=tasks[i].OpeningTime
-            end=tasks[i].Unavailabilities[0].Start
+            end=min(tasks[i].Unavailabilities[0].Start,tasks[i].ClosingTime)
             if tasks[i].Unavailabilities[0].Start != 8*60:
                 new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
                                 tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
-                                start, end, [],len(tasks[i].Unavailabilities)))
+                                start, end, [],len(tasks[i].Unavailabilities))) 
+            if end==tasks[i].ClosingTime:
+                continue
             for sous_tache in range(len(tasks[i].Unavailabilities)):
                 start=tasks[i].Unavailabilities[sous_tache].End
                 if sous_tache == len(tasks[i].Unavailabilities)-1:
                     end=tasks[i].ClosingTime
                 else:
-                    end=tasks[i].Unavailabilities[sous_tache+1].Start
-                new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
+                    end=min(tasks[i].Unavailabilities[sous_tache+1].Start,tasks[i].ClosingTime)
+                if end>start:
+                    new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
                             tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
                             start, end, [],len(tasks[i].Unavailabilities)))
+                if end == tasks[i].ClosingTime:
+                    break
+
     return new_tasks
             
 
@@ -55,7 +62,7 @@ for k in range(1,number_of_employees):
         employees_unavailability.append(0)
 
 new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
-print(new_tasks[4+6])
+print(new_tasks[6+20])
 ##***************************** Model 
 
 #DELTA, T = best_solution(employees,new_tasks)
