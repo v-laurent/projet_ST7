@@ -17,6 +17,10 @@ def best_solution(employees,tasks):
             for i in range(number_of_tasks+1)
             for k in range(1, number_of_employees+1) }
 
+    P = { (k,i) : m.addVar(vtype=GRB.INTEGER, lb=480, ub=1440, name=f'T_{i}_{k}')
+            for i in range(number_of_tasks+1)
+            for k in range(1, number_of_employees+1) }
+
     #variables utiles
     d = { (i,j) : distance(tasks[i], tasks[j]) 
             for i in range(number_of_tasks+1)

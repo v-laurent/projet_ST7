@@ -20,7 +20,7 @@ class TEmployee:
 ##**********************************    TTask   **********************************
 
 class TTask:
-    def __init__(self, TaskId, Latitude, Longitude, TaskDuration, Skill, Level, OpeningTime, ClosingTime, Unavalaibilities, number_of_sisters):
+    def __init__(self, TaskId, Latitude, Longitude, TaskDuration, Skill, Level, OpeningTime, ClosingTime, Unavalaibilities, number_of_sisters, id_employee=0):
         self.TaskId = TaskId
         self.Latitude = Latitude
         self.Longitude = Longitude
@@ -31,6 +31,7 @@ class TTask:
         self.ClosingTime = ClosingTime
         self.Unavalaibilities = Unavalaibilities
         self.number_of_sisters = number_of_sisters
+        self.id_employee = id_employee
 
     def __str__(self): 
         return self.TaskId +" "+ str(self.Latitude) +" "+ str(self.Longitude) +" "+ str(self.TaskDuration) +" "+ str(self.Skill) +" "+ str(self.Level) +" "+ str(self.OpeningTime) +" "+ str(self.ClosingTime)
