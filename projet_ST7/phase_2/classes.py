@@ -39,10 +39,10 @@ class TTask:
 
 class TUnavalaibility:
     def __init__(self, Latitude, Longitude, Start, End):
-        self.TaskId = Latitude
-        self.Latitude = Longitude
-        self.Longitude = Start
-        self.TaskDuration = End   
+        self.Latitude = Latitude
+        self.Longitude = Longitude
+        self.Start = Start
+        self.End = End   
     
 def __str__(self): 
         return str(self.Latitude) +" "+ str(self.Longitude) +" "+ str(self.Start) +" "+ str(self.End) 
