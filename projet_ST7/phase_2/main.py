@@ -28,9 +28,10 @@ def sous_taches(tasks):
         else:
             start=tasks[i].OpeningTime
             end=tasks[i].Unavailabilities[0].Start
-            new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
-                            tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
-                            start, end, [],len(tasks[i].Unavailabilities)))
+            if tasks[i].Unavailabilities[0].Start != 8*60:
+                new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
+                                tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
+                                start, end, [],len(tasks[i].Unavailabilities)))
             for sous_tache in range(len(tasks[i].Unavailabilities)):
                 start=tasks[i].Unavailabilities[sous_tache].End
                 if sous_tache == len(tasks[i].Unavailabilities)-1:
