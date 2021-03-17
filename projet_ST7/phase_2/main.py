@@ -19,15 +19,15 @@ country = "Bordeaux"
 employees, tasks = readingData(country)
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
 depots = [TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440,[],0,k)
-        for k in range(1,number_of_employees+1)]
+        for k in range(1,number_of_employees)]
 def sous_taches(tasks):
     new_tasks=[]
-    for i in range(1,number_of_tasks+1):
+    for i in range(1,number_of_tasks):
         if len(tasks[i].Unavailabilities)==0:
             new_tasks.append(tasks[i])
         else:
             start=tasks[i].OpeningTime
-            end=tasks[i].Unavailabilies[0].startTime
+            end=tasks[i].Unavailabilities[0].Start
             new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
                             tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
                             start, end, [],len(tasks[i].Unavailabilities)))
@@ -36,27 +36,28 @@ def sous_taches(tasks):
                 if sous_tache == len(tasks[i].Unavailabilities)-1:
                     end=tasks[i].ClosingTime
                 else:
-                    end=tasks[i].Unavailabilies[sous_tache+1].Start
+                    end=tasks[i].Unavailabilities[sous_tache+1].Start
                 new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
                             tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
                             start, end, [],len(tasks[i].Unavailabilities)))
+    return new_tasks
             
 
 employees_unavailability=[]
-for k in range(1,number_of_employees+1):
-    if len(employees[k].Unavalaibilities)!=0: #if the employee has unavailabilities
-        employees_unavailability.append(TTask(-1,employees[k].Unavalaibilities[0].Latitude, employees[k].Unavailabilies[0].Longitude, 
-                        employees[k].Unavalaibilities[0].ClosingTime-employees[k].Unavalaibilities[0].ClosingTime,
-                        "",0,employees[k].Unavalaibilities[0].OpeningTime, employees[k].Unavalaibilities[0].ClosingTime,
+for k in range(1,number_of_employees):
+    if len(employees[k].Unavailabilities)!=0: #if the employee has unavailabilities
+        employees_unavailability.append(TTask(-1,employees[k].Unavailabilities[0].Latitude, employees[k].Unavailabilities[0].Longitude, 
+                        employees[k].Unavailabilities[0].End-employees[k].Unavailabilities[0].End,
+                        "",0,employees[k].Unavailabilities[0].Start, employees[k].Unavailabilities[0].End,
                         [],0,k))
     else:
-        employees_unavailability.append(None)
+        employees_unavailability.append(0)
 
-new_tasks = [None]+ [depots] + employees_unavailability+ sous_taches(tasks)
-
+new_tasks = [0]+ [depots] + employees_unavailability+ sous_taches(tasks)
+print(new_tasks[6])
 ##***************************** Model 
 
-DELTA, T = best_solution(employees,new_tasks)
+#DELTA, T = best_solution(employees,new_tasks)
 
 ##****************************   plot 
 

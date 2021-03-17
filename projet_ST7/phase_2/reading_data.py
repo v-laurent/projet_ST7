@@ -17,7 +17,7 @@ def readingData(country):
     for index, row in employees_unavailabilities_sheet.iterrows():
         Start = dateToMinute( row["Start"] )
         End = dateToMinute( row["End"] )
-        employees_unavailabilities[row["EmployeeName"]]= [TUnavalaibility (row["Latitude"], row["Longitude"], Start, End )]
+        employees_unavailabilities[row["EmployeeName"]]= [TUnavailability (row["Latitude"], row["Longitude"], Start, End )]
 
     #employees
     employees_sheet = pd.read_excel(xls, 'Employees')
@@ -40,24 +40,24 @@ def readingData(country):
     for index, row in task_unavailabilities_sheet.iterrows():
         Start = dateToMinute( row["Start"] )
         End = dateToMinute( row["End"] )
-        tasks_unavailabilities[row["TaskId"]] = TUnavalaibility(0,0, Start, End)
+        tasks_unavailabilities[row["TaskId"]] = TUnavailability(0,0, Start, End)
 
     #tasks
     task_sheet = pd.read_excel(xls, 'Tasks')
     tasks = [0]  ## in order to begin index at 1, rather than 0
     for index, row in task_sheet.iterrows():
-        #openingTime = dateToMinute( row["OpeningTime"] )
-        #closingTime = dateToMinute( row["ClosingTime"] )
-        openingTime = 777
-        closingTime = 7777
+        openingTime = dateToMinute( row["OpeningTime"] )
+        closingTime = dateToMinute( row["ClosingTime"] )
         if row["Skill"] in skillToRank.keys(): 
             skill = skillToRank[ row["Skill"] ] 
         else: 
             skill = skillToRank["other"]
         if row["TaskId"] in tasks_unavailabilities:  ## if the task is unavailable
-            tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], skill, row["Level"], openingTime, closingTime, tasks_unavailabilities[row["TaskId"]], 0, 0) )
+            tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], skill, row["Level"], openingTime, closingTime, [tasks_unavailabilities[row["TaskId"]]], 0, 0) )
         else:
             tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], skill, row["Level"], openingTime, closingTime, [], 0, 0) )
     
     
     return employees, tasks
+employees,tasks=readingData("Bordeaux")
+print(employees[0])
