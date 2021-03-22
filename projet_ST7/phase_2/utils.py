@@ -53,7 +53,7 @@ def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=ph
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
-def fichier_texte(DELTA,T,P,employees,number_of_tasks,country,phase=phase,instance=instance):
+def fichier_texte(DELTA,T,P,tasks,employees,number_of_tasks,country,phase=phase,instance=instance):
     directory = os.path.dirname(os.path.realpath(__file__))
     directory = directory + os.sep+"fichiers_txt_phase" +phase
     if not os.path.exists(directory):
