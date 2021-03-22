@@ -154,4 +154,8 @@ def best_solution(employees,tasks):
             for i in range(1, number_of_tasks+1)
             for k in range(1, number_of_employees+1) }
 
-    return DELTA, T
+    P = { (k,i) : P[(k,i)].x
+            for i in range(1, number_of_tasks+1)
+            for k in range(1, number_of_employees+1) }
+
+    return DELTA, T, P

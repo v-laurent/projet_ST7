@@ -72,7 +72,7 @@ number_of_employees=len(employees)-1
 
 ##***************************** Model 
 
-DELTA, T = best_solution(employees,new_tasks)
+DELTA, T, P = best_solution(employees,new_tasks)
 
 ##****************************   plot 
 
@@ -108,4 +108,4 @@ for k in range(1,number_of_employees+1):
     task_numbers[k].append(0)
 
 draw(latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
-#fichier_texte(DELTA,T,employees,number_of_tasks,country,phase=phase,instance=instance)
+fichier_texte(DELTA,T,P,tasks,employees,number_of_tasks,country,phase=phase,instance=instance)
