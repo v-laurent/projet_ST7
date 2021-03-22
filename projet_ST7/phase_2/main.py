@@ -60,12 +60,11 @@ employees_unavailability=[]
 for k in range(1,number_of_employees):
     if len(employees[k].Unavailabilities)!=0: #if the employee has unavailabilities
         employees_unavailability.append(TTask(-1,employees[k].Unavailabilities[0].Latitude, employees[k].Unavailabilities[0].Longitude, 
-                        employees[k].Unavailabilities[0].End-employees[k].Unavailabilities[0].End,
+                        employees[k].Unavailabilities[0].End-employees[k].Unavailabilities[0].Start,
                         "",0,employees[k].Unavailabilities[0].Start, employees[k].Unavailabilities[0].End,
                         [],0,k))
     # else:
     #     employees_unavailability.append(0)
-
 new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
 number_of_tasks=len(new_tasks)-1
 number_of_employees=len(employees)-1
@@ -74,12 +73,21 @@ number_of_employees=len(employees)-1
 
 DELTA, T, P = best_solution(employees,new_tasks)
 
+<<<<<<< HEAD
+##****************************   plot 
+=======
 ##****************************   plot  
 
+>>>>>>> 56020f9589d09df1720bb803c04d9408285c8059
 latitudes=[[] for employee in range(number_of_employees+1)]
 longitudes=[[] for employee in range(number_of_employees+1)]
 task_numbers=[[] for employee in range(number_of_employees+1)]
 
+# for i in range(1,number_of_tasks+1):
+#     for j in range(1,number_of_tasks+1):
+#         for k in range(1,number_of_employees+1):
+#             if DELTA[(i,j,k)]==1:
+#                 print(i,j,k)
 for k in range(1,number_of_employees+1):
     T_f = []
     for i in range(1,number_of_tasks+1):
@@ -90,14 +98,14 @@ for k in range(1,number_of_employees+1):
             if int(DELTA[(i,j,k)])==1:
                 if i not in range(1,number_of_employees+1) and j not in range(1,number_of_employees+1):
                     #print("distance{}-{}".format(i,j),int(distance(tasks[i],tasks[j])))
-                    latitudes[k].append(new_tasks[i].Latitude)
-                    longitudes[k].append(new_tasks[i].Longitude)
-                    task_numbers[k].append(new_tasks[i].TaskId)
+                        latitudes[k].append(new_tasks[i].Latitude)
+                        longitudes[k].append(new_tasks[i].Longitude)
+                        task_numbers[k].append(new_tasks[i].TaskId)
                 elif i in range(1,number_of_employees+1) and j not in range(1,number_of_employees+1):
                     #print("distance{}-{}".format(i,j),int(distance(employees[k],tasks[j])),"distance au depot")
                     latitudes[k].append(employees[k].Latitude)
                     longitudes[k].append(employees[k].Longitude)
-                    task_numbers[k].append(new_tasks[i].TaskId)
+                    task_numbers[k].append("D")
                 elif j in range(1,number_of_employees+1) and i not in range(1,number_of_employees+1):
                     #print("distance{}-{}".format(i,j),int(distance(tasks[i],employees[k])),"distance au depot")
                     latitudes[k].append(new_tasks[i].Latitude)
@@ -107,5 +115,5 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-draw(latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
-fichier_texte(DELTA,T,P,tasks,employees,number_of_tasks,country,phase=phase,instance=instance)
+draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
+#fichier_texte(DELTA,T,P,tasks,employees,number_of_tasks,country,phase=phase,instance=instance)

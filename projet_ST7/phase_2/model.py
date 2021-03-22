@@ -30,6 +30,11 @@ def best_solution(employees,tasks):
             for k in range(1, number_of_employees+1) }
 
     #useful variables
+<<<<<<< HEAD
+
+    #without the depots
+=======
+>>>>>>> 56020f9589d09df1720bb803c04d9408285c8059
     d = { (i,j,k) : distance(tasks[i], tasks[j])
             for i in range(1, number_of_tasks+1)  
             for j in range(1, number_of_tasks+1)  
@@ -115,7 +120,7 @@ def best_solution(employees,tasks):
     #some tasks have to be done by only one employee
     task_done_by_employee_constr = {t : m.addConstr( quicksum([ DELTA[(i,t, tasks[t].id_employee)] for i in range(1, number_of_tasks+1) ]) == 1, name=f'task_done_by_employee_{t}')
                                         for t in range(1, number_of_tasks+1) if tasks[t].id_employee != 0}
-
+    
     task_not_done_by_others_constr = {t : m.addConstr( quicksum([ DELTA[(i,t, k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1) 
                                                                                   if k != tasks[t].id_employee]) == 0, name=f'task_not_done_by_others_{t}')
                                         for t in range(1, number_of_tasks+1) if tasks[t].id_employee != 0}
@@ -140,6 +145,7 @@ def best_solution(employees,tasks):
 
     #resolution
     m.update()
+    #m.display()
     m.optimize()
 
     #returning the results
