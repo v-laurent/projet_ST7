@@ -53,24 +53,47 @@ def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=ph
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
-def fichier_texte(DELTA,T,employees,number_of_tasks,country,phase=phase,instance=instance):
+def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities,country,phase=phase,instance=instance):
     directory = os.path.dirname(os.path.realpath(__file__))
-    directory = directory + os.sep+"fichiers_txt_phase" +phase
+    directory = directory + os.sep + "fichiers_txt_phase" + phase
     if not os.path.exists(directory):
         os.makedirs(directory)
     os.chdir(directory)
+    
     titre = "Solution"+country+"V"+instance+"ByV"+phase
-    texte=open(f'{titre}.txt','w')
-    #rajouter le cas ou la tache n est pas realisee
+    texte = open(f'{titre}.txt','w')
+    number_of_tasks = len(tasks)-1
+    number_of_employees = len(employees)-1
+    
     resultats=[['taskId','performed','employeeName','startTime']]
+    for n in range(1, number_of_tasks+1):
+        SOMME_DELTA = 0
+        for i in range(1, len(new_tasks) + 1):
+            for j in range(1, len(new_tasks) + 1):
+                for k in range(1, number_of_employees + 1):
+                    if new_tasks[i].TaskId == f"T{n}"
+                        SOMME_DELTA += DELTA[(i,j,k)]
+        if SOMME_DELTA==1:
+            resultats.append([f'T{n}',1,employees[k].EmployeeName,T[(k,i)]])
+        else:
+            resultats.append([f'T{n]',0,"",""])
 
-    number_of_employees=len(employees)
-    for i in range(0,number_of_tasks): 
-        for j in range(0,number_of_tasks):
-            for k in range(1,number_of_employees):
-                if DELTA[(i,j,k)]==1:
-                    if i!= 0:
-                        resultats.append([f'T{i}',1,employees[k].EmployeeName,T[(k,i)]])
+
+    resultats.append(["employeeName", "lunchBreakStartTime"])
+    for k in range(1, number_of_employees+1):
+        for i in range(1, number_of_tasks+1):
+            if P[(k,i)] == 1:
+                task_ID = new_tasks[i + number_of_employees + number_of_unavailabilities].TaskId
+                task_ID_num = int(task_ID[1:2])
+                if T[(k,i)] + tasks[task_ID_num].TaskDuration <= 12*60:
+                    resultats.append([f'{employees[k].EmployeeName}', 12*60])
+                else :
+                    resultats.append([f'{employees[k].EmployeeName}', T[(k,i)] + tasks[task_ID_num].TaskDuration])
+
     for line in (resultats):
-        texte.write("{};{};{};{};\n".format(line[0],line[1],line[2],line[3]))
+        if len(line) == 4:
+            texte.write("{};{};{};{};\n".format(line[0],line[1],line[2],line[3]))
+        else :
+            texte.write("{};{};\n".format(line[0],line[1]))
+    
     print(resultats) 
