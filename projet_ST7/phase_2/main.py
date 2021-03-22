@@ -72,7 +72,6 @@ new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
 DELTA, T = best_solution(employees,new_tasks)
 
 ##****************************   plot 
-
 latitudes=[[] for employee in range(number_of_employees+1)]
 longitudes=[[] for employee in range(number_of_employees+1)]
 task_numbers=[[] for employee in range(number_of_employees+1)]
