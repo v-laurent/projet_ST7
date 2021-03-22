@@ -10,41 +10,37 @@ def readingData(country):
     file_path = current_dir + "/InstancesV2/Instance" + country + "V2.xlsx"
     xls = pd.ExcelFile(file_path)
 
-    #employees_unavailabilities
-    employees_unavailabilities_sheet = pd.read_excel(xls, 'Employees Unavailabilities')
-    employees_unavailabilities = {}
-    
-    for index, row in employees_unavailabilities_sheet.iterrows():
-        Start = dateToMinute( row["Start"] )
-        End = dateToMinute( row["End"] )
-        employees_unavailabilities[row["EmployeeName"]]= [TUnavailability (row["Latitude"], row["Longitude"], Start, End )]
 
     #employees
     employees_sheet = pd.read_excel(xls, 'Employees')
     skillToRank = {skill : i for i,skill in enumerate( set(employees_sheet["Skill"]) )}
+    employee_to_rank = {employee : i for i,employee in enumerate( set(employees_sheet["EmployeeName"]) )}
     skillToRank['other'] = len(skillToRank)
-    employees = [0]  ## in order to begin index at 1, rather than 0
+    employees = [None]  ## in order to begin index at 1, rather than 0
     
     for index, row in employees_sheet.iterrows():
         workingStartTime = dateToMinute( row["WorkingStartTime"] )
         workingEndTime = dateToMinute( row["WorkingEndTime"] )
         skill = skillToRank[ row["Skill"] ]
-        if row["EmployeeName"] in employees_unavailabilities:  ## if the employee is unavailable
-            employees.append( TEmployee(row["EmployeeName"], row["Latitude"], row["Longitude"], skill, row["Level"], workingStartTime, workingEndTime, employees_unavailabilities[row["EmployeeName"]]) )
-        else:
-            employees.append( TEmployee(row["EmployeeName"], row["Latitude"], row["Longitude"], skill, row["Level"], workingStartTime, workingEndTime, [] ) )
+        employees.append( TEmployee(row["EmployeeName"], row["Latitude"], row["Longitude"], skill, row["Level"], workingStartTime, workingEndTime, [] ) )
 
-      #tasks_unavailabilities
-    task_unavailabilities_sheet = pd.read_excel(xls, 'Tasks Unavailabilities')
-    tasks_unavailabilities = {}
-    for index, row in task_unavailabilities_sheet.iterrows():
+
+
+     #employees_unavailabilities
+    employees_unavailabilities_sheet = pd.read_excel(xls, 'Employees Unavailabilities')
+    
+    for index, row in employees_unavailabilities_sheet.iterrows():
         Start = dateToMinute( row["Start"] )
         End = dateToMinute( row["End"] )
-        tasks_unavailabilities[row["TaskId"]] = TUnavailability(0,0, Start, End)
+        unavailability = TUnavailability(row["Latitude"], row["Longitude"], Start, End)
+        employees[ employee_to_rank[ row["employeeName"] ]].Unavailabilities.append(unavailability)
+
+
 
     #tasks
     task_sheet = pd.read_excel(xls, 'Tasks')
-    tasks = [0]  ## in order to begin index at 1, rather than 0
+    task_to_rank = {task : i for i,task in enumerate( set(task_sheet["TaskId"]) )}
+    tasks = [None]  ## in order to begin index at 1, rather than 0
     for index, row in task_sheet.iterrows():
         openingTime = dateToMinute( row["OpeningTime"] )
         closingTime = dateToMinute( row["ClosingTime"] )
@@ -52,10 +48,15 @@ def readingData(country):
             skill = skillToRank[ row["Skill"] ] 
         else: 
             skill = skillToRank["other"]
-        if row["TaskId"] in tasks_unavailabilities:  ## if the task is unavailable
-            tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], skill, row["Level"], openingTime, closingTime, [tasks_unavailabilities[row["TaskId"]]], 0, 0) )
-        else:
-            tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], skill, row["Level"], openingTime, closingTime, [], 0, 0) )
+        tasks.append( TTask(row["TaskId"], row["Latitude"], row["Longitude"], row["TaskDuration"], skill, row["Level"], openingTime, closingTime, [], 0, 0) )
     
+
+       #tasks_unavailabilities
+    task_unavailabilities_sheet = pd.read_excel(xls, 'Tasks Unavailabilities')
+    for index, row in task_unavailabilities_sheet.iterrows():
+        Start = dateToMinute( row["Start"] )
+        End = dateToMinute( row["End"] )
+        unavailability = TUnavailability(0,0, Start, End)
+        tasks[ task_to_rank[ row["TaskId"] ] ].append(unavailability)
     
     return employees, tasks
