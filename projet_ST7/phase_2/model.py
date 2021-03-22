@@ -4,7 +4,7 @@ from gurobipy import *
 
 def best_solution(employees,tasks):
 
-    tasks = [t for t in tasks if t != 0]    
+    tasks = [0]+[t for t in tasks if t != 0]    
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
 
     #model
@@ -32,16 +32,10 @@ def best_solution(employees,tasks):
     #useful variables
 
     #without the depots
-    d = { (i,j,k) : distance(tasks[i], tasks[j]) 
-            for i in range(number_fo_employee+1, number_of_tasks+1)  #in A*
-            for j in range(number_of_employee+1, number_of_tasks+1)  #in A*
+    d = { (i,j,k) : distance(tasks[i], tasks[j])
+            for i in range(1, number_of_tasks+1)  
+            for j in range(1, number_of_tasks+1)  
             for k in range(1, number_of_employees+1) }
-
-    #to manage the beggining of each employee 
-    for k in range(1, number_of_employees+1):
-        for i in range(1, number_of_tasks+1):
-                d[(k,i,k)] = distance(tasks[k], tasks[i])
-                d[(i,k,k)] = d[(k,i,k)]
 
     #constraints
 
@@ -72,7 +66,7 @@ def best_solution(employees,tasks):
                             for k in range(1,number_of_employees+1) }
 
     #all the employees have one and only one lunch time
-    lunch_time_constr = {k : m.addConstr( quicksum([ P[(k,i)] for i in range(1, number_of_tasks+1) ]) == 1, name=f'lunch_time_constr_{i}')
+    lunch_time_constr = {k : m.addConstr( quicksum([ P[(k,i)] for i in range(1, number_of_tasks+1) ]) == 1, name=f'lunch_time_constr_{k}')
                             for k in range(1, number_of_employees+1)}
 
     #the lunch time begins after 12am
@@ -99,8 +93,8 @@ def best_solution(employees,tasks):
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
-    #--------------------------------------couille sur celle là sauf si on a de la chance
-    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - (3.6/(50*60)) * d[(i,k,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
+    #--------------------------------------j'ai enlevé le fait qu'on ait le temps de revenir au depot : bonne idée?
+    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration, name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(1,number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
 
@@ -127,6 +121,7 @@ def best_solution(employees,tasks):
                                                                                   if k != tasks[t].id_employee]) == 0, name=f'task_not_done_by_others_{t}')
                                         for t in range(1, number_of_tasks+1) if tasks[t].id_employee != 0}
 
+    
     #if one sub task is done, all the others have to stay unvisited
     family = 1
     subtask_constr = dict()
@@ -135,12 +130,14 @@ def best_solution(employees,tasks):
                                                                         for j in range(family, family + tasks[family].number_of_sisters+1)
                                                                         for k in range(1, number_of_employees+1) ]) <= 1, name=f'subtask_constr_{family}')
         family += tasks[family].number_of_sisters+1
-
+    
+     
+    #sans doute pb on considère des taches qui ne doivent pas etre comptées ?
 
     #objective
-    m.setObjective(quicksum(DELTA[(i,j,k)]*d[(i,j,k)] for i in range(1, number_of_tasks+1)
+    m.setObjective(quicksum(DELTA[(i,j,k)] for i in range(1, number_of_tasks+1)
                                                     for j in range(1, number_of_tasks+1)
-                                                    for k in range(1, number_of_employees+1)),GRB.MINIMIZE)
+                                                    for k in range(1, number_of_employees+1)),GRB.MAXIMIZE)
 
     #resolution
     m.update()
