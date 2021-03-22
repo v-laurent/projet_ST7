@@ -32,15 +32,9 @@ def best_solution(employees,tasks):
     #useful variables
 
     #without the depots
-<<<<<<< HEAD
     d = { (i,j,k) : distance(tasks[i], tasks[j])
             for i in range(1, number_of_tasks+1)  
             for j in range(1, number_of_tasks+1)  
-=======
-    d = { (i,j,k) : distance(tasks[i], tasks[j]) 
-            for i in range(number_of_employees+1, number_of_tasks+1)  #in A*
-            for j in range(number_of_employees+1, number_of_tasks+1)  #in A*
->>>>>>> fc0bb19acc0ff3b75cb2f69c6043742b442cda56
             for k in range(1, number_of_employees+1) }
 
     #constraints
