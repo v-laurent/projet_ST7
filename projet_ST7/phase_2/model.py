@@ -48,7 +48,8 @@ def best_solution(employees,tasks):
     
     #temporal constraints
     oo = 1440
-    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] -(1-DELTA[(i,j,k)])*oo +60*X[(i,j,k)], name=f'temporal_constr_{k}_{i}_{j}')
+    lunch_duration=60
+    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] -(1-DELTA[(i,j,k)])*oo +lunch_duration*X[(i,j,k)], name=f'temporal_constr_{k}_{i}_{j}')
                             for i in range(1,number_of_tasks+1)
                             for j in range(number_of_employees+1,number_of_tasks+1)  #i in A*
                             for k in range(1,number_of_employees+1) }
