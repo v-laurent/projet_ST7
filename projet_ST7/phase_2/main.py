@@ -73,8 +73,12 @@ number_of_employees=len(employees)-1
 
 DELTA, T, P = best_solution(employees,new_tasks)
 
+<<<<<<< HEAD
 ##****************************   plot 
+=======
+##****************************   plot  
 
+>>>>>>> 56020f9589d09df1720bb803c04d9408285c8059
 latitudes=[[] for employee in range(number_of_employees+1)]
 longitudes=[[] for employee in range(number_of_employees+1)]
 task_numbers=[[] for employee in range(number_of_employees+1)]
