@@ -32,15 +32,9 @@ def best_solution(employees,tasks):
     #useful variables
 
     #without the depots
-<<<<<<< HEAD
     d = { (i,j,k) : distance(tasks[i], tasks[j])
             for i in range(1, number_of_tasks+1)  
             for j in range(1, number_of_tasks+1)  
-=======
-    d = { (i,j,k) : distance(tasks[i], tasks[j]) 
-            for i in range(number_of_employees+1, number_of_tasks+1)  #in A*
-            for j in range(number_of_employees+1, number_of_tasks+1)  #in A*
->>>>>>> fc0bb19acc0ff3b75cb2f69c6043742b442cda56
             for k in range(1, number_of_employees+1) }
 
     #constraints
@@ -56,7 +50,8 @@ def best_solution(employees,tasks):
     
     #temporal constraints
     oo = 1440
-    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] -(1-DELTA[(i,j,k)])*oo +60*X[(i,j,k)], name=f'temporal_constr_{k}_{i}_{j}')
+    lunch_duration=60
+    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] -(1-DELTA[(i,j,k)])*oo +lunch_duration*X[(i,j,k)], name=f'temporal_constr_{k}_{i}_{j}')
                             for i in range(1,number_of_tasks+1)
                             for j in range(number_of_employees+1,number_of_tasks+1)  #i in A*
                             for k in range(1,number_of_employees+1) }
