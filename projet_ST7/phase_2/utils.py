@@ -68,32 +68,38 @@ def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities
     resultats=[['taskId','performed','employeeName','startTime']]
     for n in range(1, number_of_tasks+1):
         SOMME_DELTA = 0
-        for i in range(1, len(new_tasks) + 1):
-            for j in range(1, len(new_tasks) + 1):
+        for i in range(1, len(new_tasks)):
+            for j in range(1, len(new_tasks)):
                 for k in range(1, number_of_employees + 1):
-                    if new_tasks[i].TaskId == f"T{n}"
-                        SOMME_DELTA += DELTA[(i,j,k)]
-        if SOMME_DELTA==1:
-            resultats.append([f'T{n}',1,employees[k].EmployeeName,T[(k,i)]])
-        else:
-            resultats.append([f'T{n]',0,"",""])
+                    if new_tasks[i].TaskId == 'T{}'.format(n):
+                        if DELTA[(i,j,k)] == 1:
+                            resultats.append([f'T{n}',1,employees[k].EmployeeName,T[(k,i)]])
+                            SOMME_DELTA += 1
+        if SOMME_DELTA == 0:
+            resultats.append([f'T{n}',0,"",""])
 
-
+    resultats.append([])
     resultats.append(["employeeName", "lunchBreakStartTime"])
     for k in range(1, number_of_employees+1):
-        for i in range(1, number_of_tasks+1):
+        for i in range(1, number_of_employees +1): 
+            if P[(k,i)] == 1:                   #the employee doesn't do anything before noon
+                resultats.append([f'{employees[k].EmployeeName}', 12*60])
+        for i in range(1 + number_of_employees, len(new_tasks)):
             if P[(k,i)] == 1:
-                task_ID = new_tasks[i + number_of_employees + number_of_unavailabilities].TaskId
+                task_ID = new_tasks[i].TaskId
                 task_ID_num = int(task_ID[1:2])
                 if T[(k,i)] + tasks[task_ID_num].TaskDuration <= 12*60:
                     resultats.append([f'{employees[k].EmployeeName}', 12*60])
                 else :
                     resultats.append([f'{employees[k].EmployeeName}', T[(k,i)] + tasks[task_ID_num].TaskDuration])
+               
 
     for line in (resultats):
         if len(line) == 4:
             texte.write("{};{};{};{};\n".format(line[0],line[1],line[2],line[3]))
-        else :
+        elif len(line) == 0 :
+            texte.write("\n")
+        else:
             texte.write("{};{};\n".format(line[0],line[1]))
     
     print(resultats) 
