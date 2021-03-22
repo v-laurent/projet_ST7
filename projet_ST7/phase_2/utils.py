@@ -74,12 +74,12 @@ def fichier_texte(DELTA,T,P,tasks,employees,number_of_tasks,country,phase=phase,
 
     resultats.append(["employeeName", "lunchBreakStartTime"])
     for k in range(number_of_employees):
-        for i in range(number_of_tasks):
-            if P[(i,k)] == 1:
-                if T[(i,k)] + tasks[i].TaskDuration <= 12*60:
+        for i in range(1,number_of_tasks):
+            if P[(k,i)] == 1:
+                if T[(k,i)] + tasks[i].TaskDuration <= 12*60:
                     resultats.append([f'{employees[k].EmployeeName}', 12*60])
                 else :
-                    resultats.append([f'{employees[k].EmployeeName}', T[(i,k)] + tasks[i].TaskDuration])
+                    resultats.append([f'{employees[k].EmployeeName}', T[(k,i)] + tasks[i].TaskDuration])
 
     for line in (resultats):
         if len(line) == 4:
