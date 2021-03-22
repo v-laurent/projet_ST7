@@ -71,7 +71,7 @@ new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
 print(new_tasks[13+30])
 ##***************************** Model 
 
-#DELTA, T = best_solution(employees,new_tasks)
+DELTA, T = best_solution(employees,new_tasks)
 
 ##****************************   plot 
 
