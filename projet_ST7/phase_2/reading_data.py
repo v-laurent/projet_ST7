@@ -14,7 +14,7 @@ def readingData(country):
     #employees
     employees_sheet = pd.read_excel(xls, 'Employees')
     skillToRank = {skill : i for i,skill in enumerate( set(employees_sheet["Skill"]) )}
-    employee_to_rank = {employee : i for i,employee in enumerate( set(employees_sheet["EmployeeName"]) )}
+    employee_to_rank = {employee_name : i+1 for i,employee_name in enumerate( set(employees_sheet["EmployeeName"]) )}
     skillToRank['other'] = len(skillToRank)
     employees = [None]  ## in order to begin index at 1, rather than 0
     
@@ -33,13 +33,13 @@ def readingData(country):
         Start = dateToMinute( row["Start"] )
         End = dateToMinute( row["End"] )
         unavailability = TUnavailability(row["Latitude"], row["Longitude"], Start, End)
-        employees[ employee_to_rank[ row["employeeName"] ]].Unavailabilities.append(unavailability)
+        employees[ employee_to_rank[ row["EmployeeName"] ]].Unavailabilities.append(unavailability)
 
 
 
     #tasks
     task_sheet = pd.read_excel(xls, 'Tasks')
-    task_to_rank = {task : i for i,task in enumerate( set(task_sheet["TaskId"]) )}
+    task_to_rank = {task : i+1 for i,task in enumerate( set(task_sheet["TaskId"]) )}
     tasks = [None]  ## in order to begin index at 1, rather than 0
     for index, row in task_sheet.iterrows():
         openingTime = dateToMinute( row["OpeningTime"] )
@@ -57,6 +57,6 @@ def readingData(country):
         Start = dateToMinute( row["Start"] )
         End = dateToMinute( row["End"] )
         unavailability = TUnavailability(0,0, Start, End)
-        tasks[ task_to_rank[ row["TaskId"] ] ].append(unavailability)
+        tasks[ task_to_rank[ row["TaskId"] ] ].Unavailabilities.append(unavailability)
     
     return employees, tasks
