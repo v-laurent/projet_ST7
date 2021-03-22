@@ -15,7 +15,7 @@ from gurobipy import *
 
 ##***************************** Reading Data 
 
-country = "Austria"
+country = "Spain"
 employees, tasks = readingData(country)
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
 depots = [TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440,[],0,k)
@@ -30,7 +30,6 @@ def sous_taches(tasks):
             if tasks[i].Unavailabilities[unava].Start == tasks[i].OpeningTime:
                 number_of_sisters-=1
         if len(tasks[i].Unavailabilities)==0:
-            print(tasks[i].TaskId)
             new_tasks.append(tasks[i])
         else:
             start=tasks[i].OpeningTime
@@ -64,11 +63,11 @@ for k in range(1,number_of_employees):
                         employees[k].Unavailabilities[0].End-employees[k].Unavailabilities[0].End,
                         "",0,employees[k].Unavailabilities[0].Start, employees[k].Unavailabilities[0].End,
                         [],0,k))
-    else:
-        employees_unavailability.append(0)
+    # else:
+    #     employees_unavailability.append(0)
 
 new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
-print(new_tasks[13+30])
+print(new_tasks[6+1])
 ##***************************** Model 
 
 DELTA, T = best_solution(employees,new_tasks)
