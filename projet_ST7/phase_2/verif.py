@@ -5,135 +5,151 @@ from utils import *
 from reading_data import *
 import matplotlib.pyplot as plt
 
-######################################
+#################################################
 country = 'Bordeaux'
-dossier_txt = 'utils.py_phase1'
-######################################
+dossier_txt = 'fichiers_txt_phase1'
+version = 'V1ByV1'
+#################################################
+# précision choisie pour les warning (en minutes)
+epsilon = 1
 
 
 def verification(country, epsilon=0.05):
     employees,tasks = readingData(country)          # le dépôt n'est pas dans les tâches
-    number_of_employees = len(employees)
-    number_of_tasks = len(tasks)
+    number_of_employees = len(employees)-1
+    number_of_tasks = len(tasks)-1
     
-    decision = pd.read_csv(f"{dossier_txt}/{country}.txt", sep=';')
+    decision = pd.read_csv(f"{dossier_txt}/Solution{country}{version}.txt", sep=';', nrows=number_of_tasks)
     decision = decision[['taskId','performed','employeeName','startTime']]
 
+    lunch = pd.read_csv(f"{dossier_txt}/Solution{country}{version}.txt", sep=';', skiprows=number_of_tasks+1 ,nrows=number_of_employees)
+    lunch = lunch[['employeeName','lunchBreakStartTime']]
+
     # Pourcentage de tâches réalisées
-    print("Pourcentage de tâches réalisées : {} %".format(decision['performed'].sum()/number_of_tasks*100))
+    print("Pourcentage de tâches réalisées : {} %".format((decision['performed'].sum())/number_of_tasks*100))
 
     # Contraintes
-    for i in range(0, number_of_tasks):
+    for i in range(1, number_of_tasks+1):
         task_id = tasks[i].TaskId
         T_i_startTime = decision[decision['taskId']==task_id].loc[:,'startTime'].values
         # vérification que la tâche Ti est faite
         if len(decision[decision['taskId']==task_id].loc[:,'performed'].values) == 0:
-            print(f"ERREUR : ligne de la tâche {task_id} manquante")
+            print(f"ERROR : ligne de la tâche {task_id} manquante")
             break
         if decision[decision['taskId']==task_id].loc[:,'performed'].values == 0:
             print(f"Tâche {task_id} non réalisée")
             break
         employee_name = decision[decision['taskId']==task_id].loc[:,'employeeName'].values[0]
         
-        k=0
+        k=1
         while employees[k].EmployeeName != employee_name:
             k+=1                                                # indice de l'employé effectuant la tâche i
 
         # 1- disponibilité des tâches            
         if T_i_startTime < tasks[i].OpeningTime:
-            print(f"ERREUR 1.1 : tâche {task_id} réalisée par {employee_name} avant l'ouverture de la tâche")
+            print(f"ERROR 1.1 : tâche {task_id} réalisée par {employee_name} avant l'ouverture de la tâche")
         if T_i_startTime > tasks[i].ClosingTime:
-            print(f"ERREUR 1.2 : tâche {task_id} réalisée par {employee_name} après la fermeture de la tâche")
+            print(f"ERROR 1.2 : tâche {task_id} réalisée par {employee_name} après la fermeture de la tâche")
         if T_i_startTime > tasks[i].ClosingTime - tasks[i].TaskDuration:
-            print(f"ERREUR 1.3 : tâche {task_id} réalisée par {employee_name} trop proche de la fermeture de la tâche")
-        for unavalaibility in tasks[i].Unavalaibilities :
-                if T_i_startTime + tasks[i].TaskDuration > unavalaibility.Start and T_i_startTime < unavalaibility.End:
-                    print(f"ERREUR 1.4 : tâche {task_id} réalisée par {employee_name} pendant une période d'indisponibilité de la tâche")
+            print(f"ERROR 1.3 : tâche {task_id} réalisée par {employee_name} trop proche de la fermeture de la tâche")
+        for unavailability in tasks[i].Unavailabilities :
+                if T_i_startTime + tasks[i].TaskDuration > unavailability.Start and T_i_startTime < unavailability.End:
+                    print(f"ERROR 1.4 : tâche {task_id} réalisée par {employee_name} pendant une période d'indisponibilité de la tâche")
 
         # 2- disponibilité des employés
         if T_i_startTime < employees[k].WorkingStartTime:
-            print(f"ERREUR 2.1 : {employee_name} réalise la tache {task_id} avant le début de son service")
+            print(f"ERROR 2.1 : {employee_name} réalise la tache {task_id} avant le début de son service")
         if T_i_startTime > employees[k].WorkingEndTime:
-            print(f"ERREUR 2.2 : {employee_name} réalise la tache {task_id} après la fin de son service")
+            print(f"ERROR 2.2 : {employee_name} réalise la tache {task_id} après la fin de son service")
         if T_i_startTime > employees[k].WorkingEndTime - tasks[i].TaskDuration - trajet(tasks[i],employees[k]):
-            print(f"ERREUR 2.3 : {employee_name} réalise la tache {task_id} trop proche de la fin de son service")
-        for unavalaibility in employees[k].unavalaibilities :
-            if T_i_startTime + tasks[i].TaskDuration > unavalaibility.Start and T_i_startTime < unavalaibility.End:
-                print(f"ERREUR 2.4 : {employee_name} réalise la tache {task_id} pendant sa période d'indisponibilité")
+            print(f"ERROR 2.3 : {employee_name} réalise la tache {task_id} trop proche de la fin de son service")
+        for unavailability in employees[k].Unavailabilities :
+            if T_i_startTime + tasks[i].TaskDuration > unavailability.Start and T_i_startTime < unavailability.End:
+                print(f"ERROR 2.4 : {employee_name} réalise la tache {task_id} pendant sa période d'indisponibilité")
 
         # 3- compétences
         if employees[k].Skill != tasks[i].Skill:
-            print(f"ERREUR 3.1 : compétence {employees[k].Skill} manquante")
+            print(f"ERROR 3.1 : compétence {employees[k].Skill} manquante")
         else :
             if employees[k].Level < tasks[i].Level:
-                print(f"ERREUR 3.2 : compétence n°{tasks[k].Skill} de niveau {tasks[i].Level} requis par {employee_name} (niveau {employees[k].Level} appris)")
+                print(f"ERROR 3.2 : compétence n°{tasks[k].Skill} de niveau {tasks[i].Level} requis par {employee_name} (niveau {employees[k].Level} appris)")
 
 
     # Vérification du trajet des employés
-    for k in range(number_of_employees):
+    for k in range(1,number_of_employees+1):
         employee_name = employees[k].EmployeeName
         tasks_id = decision[decision['employeeName']==employee_name].loc[:,'taskId'].values
-        tasks_startTime = decision[decision['employeeName']==employee_name].loc[:,'startTime'].values
+        T_i_startTime = decision[decision['employeeName']==employee_name].loc[:,'startTime'].values
 
         # vérification que l'employé travaille
-        if len(tasks_startTime) == 0:
+        if len(T_i_startTime) == 0:
             print(f"{employee_name} n'effectue aucune tâche")
             break
         
-        sorted_indices = np.argsort(tasks_startTime)        # indices uniquement des tâches effectuées par le technicien k
+        sorted_indices = np.argsort(T_i_startTime)        # indices uniquement des tâches effectuées par le technicien k
         sorted_indices_bis = []                             # utilisables sur tasks (ensemble de toutes les tâches)
         for i in sorted_indices:
-            for j in range(number_of_tasks):
+            for j in range(1,number_of_tasks+1):
                 if tasks[j].TaskId == tasks_id[i]:
                     sorted_indices_bis.append(j)
-        
-        # 4- trajet dépôt / première tâche
+
+        # 4- pause midi
+        lunch_time = lunch[lunch['employeeName']==employee_name].loc[:,'lunchBreakStartTime'].values
+        if len(lunch_time) == 0:
+            print(f"ERROR 4.1 : {employee_name} ne fait pas de pause repas") 
+        elif lunch_time < 12*60:
+            print(f"ERROR 4.2 : {employee_name} fait sa pause repas trop tôt, à {lunch_time[0]}")
+        elif lunch_time > 14*60:
+            print(f"ERROR 4.3 : {employee_name} fait sa pause repas trop tard, à {lunch_time[0]}")
+    
+        # 5- trajet dépôt / première tâche
         i0 = sorted_indices[0]
         i0_bis = sorted_indices_bis[0]
-        eps = tasks_startTime[i0] - (employees[k].WorkingStartTime + trajet(employees[k], tasks[i0_bis]))
+        eps = T_i_startTime[i0] - (employees[k].WorkingStartTime + trajet(employees[k], tasks[i0_bis]))
         if eps < 0:
-            print(f"ERREUR 4.1 : {employee_name} part de son dépôt trop tôt")
+            print(f"ERROR 5.1 : {employee_name} part de son dépôt trop tôt")
         else:
             if eps > epsilon:
-                print(f"warning 4.2 : {employee_name} part de son dépôt {round(eps,2)}min trop tard")
+                print(f"warning 5.2 : {employee_name} part de son dépôt {round(eps,2)}min trop tard")
         
-        # 5- temporalité des tâches
+        # 6- temporalité des tâches
         for i in range(1,len(sorted_indices)):
             i1 = sorted_indices[i-1]                # tâche de départ
             i2 = sorted_indices[i]                  # tâche d'arrivée
             i1_bis = sorted_indices_bis[i-1]
             i2_bis = sorted_indices_bis[i]
-            eps = tasks_startTime[i2] - (tasks_startTime[i1] + tasks[i1_bis].TaskDuration + trajet(tasks[i1_bis],tasks[i2_bis]))
+            eps = T_i_startTime[i2] - (T_i_startTime[i1] + tasks[i1_bis].TaskDuration + trajet(tasks[i1_bis],tasks[i2_bis]))
             if eps < 0:
-                print(f"ERREUR 5.1 : {employee_name} commence la tâche {tasks_id[i2]} trop tôt par rapport à la tâche précédente {tasks_id[i1]}")            
+                print(f"ERROR 6.1 : {employee_name} commence la tâche {tasks_id[i2]} trop tôt par rapport à la tâche précédente {tasks_id[i1]}")            
             else:
                 if eps > epsilon:
-                    print(f"warning 5.2 : {employee_name} met {round(eps,2)}min de trop pour aller de la tâche {tasks_id[i2]} à la tâche {tasks_id[i1]}")
-            
-            # pause midi
-            lunch = False
-            if (tasks_startTime[i1] < 12*60 and tasks_startTime[i2] > 12*60) or (12*60 < tasks_startTime[i1] <14*60):
-                if eps > 60:
-                    lunch = True
+                    print(f"warning 6.2 : {employee_name} met {round(eps,2)}min de trop pour aller de la tâche {tasks_id[i2]} à la tâche {tasks_id[i1]}")
 
-            # lieu de l'indisponibilité de l'employé
+            # 4 bis- temps nécessaire à la pause midi
+            if T_i_startTime[i1] < lunch_time and T_i_startTime[i2] > lunch_time:
+                if T_i_startTime[i1] + tasks[i1_bis].TaskDuration > 13*60:
+                    print(f"ERROR 4.4 : {employee_name} fini la tâche T{i1_bis} trop tard pour manger")
+                if T_i_startTime[i2] < 13*60:
+                    print(f"ERROR 4.5 : {employee_name} commence la tâche T{i2_bis} trop tôt pour manger")
+                if eps < 60:
+                    print(f"ERROR 4.6 : {employee_name} n'a pas le temps de manger entre les tâches T{i1_bis} et T{i2_bis}")
+
+            # 7- lieu de l'indisponibilité de l'employé
             una_place = False
-            for unavalaibility in employees[k].unavalaibilities :
-                if T_i_startTime[i1] < unavalaibility.Start and T_i_startTime[i2] > unavalaibility.Start:
-                    eps2 = tasks_startTime[i2] - (tasks_startTime[i1] + tasks[i1_bis].TaskDuration)
-                    if eps2 > trajet(tasks[i1_bis], unavalaibility) + (unavalaibility.End - unavalaibility.Start)+ trajet(unavalaibility , tasks[i2_bis]):
+            for unavailability in employees[k].Unavailabilities :
+                if T_i_startTime[i1] < unavailability.Start and T_i_startTime[i2] > unavailability.Start:
+                    eps2 = T_i_startTime[i2] - (T_i_startTime[i1] + tasks[i1_bis].TaskDuration)
+                    if eps2 > trajet(tasks[i1_bis], unavailability) + (unavailability.End - unavailability.Start)+ trajet(unavailability , tasks[i2_bis]):
                         una_place = True
 
-        if lunch == False:
-            print(f"ERREUR 5.3 : {employee_name} ne fait pas de pause repas")
         if una_place == False:
-            print(f"ERREUR 5.3 : {employee_name} n'est pas au bon endroit pendant sa période d'indisponibilité")
+            print(f"ERROR 7.3 : {employee_name} n'est pas au bon endroit pendant sa période d'indisponibilité")
 
-        # 6- trajet dernièrer tâche / dépôt
+        # 8- trajet dernièrer tâche / dépôt
         iN = sorted_indices[-1]
         iN_bis = sorted_indices_bis[-1]
-        if tasks_startTime[iN] > employees[k].WorkingEndTime - trajet(tasks[iN_bis], employees[k]):
-            print(f"ERREUR 6.1 : {employee_name} revient au dépôt trop tard")
+        if T_i_startTime[iN] > employees[k].WorkingEndTime - trajet(tasks[iN_bis], employees[k]):
+            print(f"ERROR 8.1 : {employee_name} revient au dépôt trop tard")
 
 
 
@@ -143,6 +159,8 @@ def verification(country, epsilon=0.05):
 # DIAGRAMME DE GANTT
 def gantt_diagram(country):
     employees,tasks = readingData(country)          # le dépôt n'est pas dans les tâches
+    employees = employees[1:]
+    tasks = tasks[1:]
     number_of_employees = len(employees)
     number_of_tasks = len(tasks)
     fig1,gnt=plt.subplots()
@@ -156,17 +174,21 @@ def gantt_diagram(country):
 
     task_times=[[] for _ in range(len(employees))]
     travel_times=[[] for _ in range(len(employees))]
-    decision = pd.read_csv(f"{dossier_txt}/{country}.txt", sep=';')
+    lunch_times=[[] for _ in range(len(employees))]
+
+    decision = pd.read_csv(f"{dossier_txt}/Solution{country}{version}.txt", sep=';', nrows=number_of_tasks)
     decision = decision[['taskId','performed','employeeName','startTime']]
+    lunch = pd.read_csv(f"{dossier_txt}/Solution{country}{version}.txt", sep=';', skiprows=number_of_tasks+1 ,nrows=number_of_employees)
+    lunch = lunch[['employeeName','lunchBreakStartTime']]
 
     for k in range(number_of_employees):
         employee_name = employees[k].EmployeeName
         tasks_id = decision[decision['employeeName']==employee_name].loc[:,'taskId'].values
-        tasks_startTime = decision[decision['employeeName']==employee_name].loc[:,'startTime'].values
-        if len(tasks_startTime) == 0:
+        T_i_startTime = decision[decision['employeeName']==employee_name].loc[:,'startTime'].values
+        if len(T_i_startTime) == 0:
             print(f"{employee_name} n'effectue aucune tâche")
             break
-        sorted_indices = np.argsort(tasks_startTime)        # indices uniquement des tâches effectuées par le technicien k
+        sorted_indices = np.argsort(T_i_startTime)          # indices uniquement des tâches effectuées par le technicien k
         sorted_indices_bis = []                             # utilisables sur tasks (ensemble de toutes les tâches)
         for i in sorted_indices:
             for j in range(number_of_tasks):
@@ -175,28 +197,35 @@ def gantt_diagram(country):
 
         end_times=[]
         for task in range(len(tasks_id)):
-            task_times[k].append((tasks_startTime[task],tasks[int(tasks_id[task].strip('T'))-1].TaskDuration))
-            gnt.annotate(tasks_id[task], (tasks_startTime[task], 10*(k+1)-1))
-            end_times.append(tasks_startTime[task]+tasks[int(tasks_id[task].strip('T'))-1].TaskDuration)
+            task_times[k].append((T_i_startTime[task],tasks[int(tasks_id[task].strip('T'))-1].TaskDuration))
+            gnt.annotate(tasks_id[task], (T_i_startTime[task], 10*(k+1)-1))
+            end_times.append(T_i_startTime[task]+tasks[int(tasks_id[task].strip('T'))-1].TaskDuration)
         end_times=sorted(end_times)
         travel_times[k].append((employees[k].WorkingStartTime,trajet(employees[k],tasks[sorted_indices_bis[0]])))
         for i in range(len(sorted_indices_bis)-1):
             if i==len(sorted_indices_bis)-1:
                 break
-            print("{} vers {}".format(tasks[sorted_indices_bis[i]].TaskId,tasks[sorted_indices_bis[i+1]].TaskId))
-            print("{}".format(trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]])))
+            #print("{} vers {}".format(tasks[sorted_indices_bis[i]].TaskId,tasks[sorted_indices_bis[i+1]].TaskId))
+            #print("{}".format(trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]])))
             travel_times[k].append((end_times[i],trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]])))
             #print(end_times[i-1])
             #print(end_times[i]+trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]]))
         travel_times[k].append((end_times[-1],trajet(employees[k],tasks[sorted_indices_bis[-1]])))
 
+        # lunch times
+        lunch_time = lunch[lunch['employeeName']==employee_name].loc[:,'lunchBreakStartTime'].values[0]
+        lunch_times[k].append((lunch_time, 60))
 
-    colors=['green','orange','blue']
+    colors=['pink','orange','blue']
     for i in range(len(employees)):
         gnt.broken_barh(task_times[i],(10*(i+1)-1,2), facecolors=('tab:{}'.format(colors[i])))
         gnt.broken_barh(travel_times[i],(10*(i+1)-2,0.5),facecolors=('tab:red'))
+        gnt.broken_barh(lunch_times[i],(10*(i+1)-3,0.5),facecolors=('tab:green'))
     
-    plt.savefig('{}.png'.format(country))
+    plt.vlines([12*60, 14*60], 0, 10*(number_of_employees+1), 'red', 'dashed', alpha=0.5)
+    plt.savefig('gantt_phase2/{}.png'.format(country))
+
+    ## 2ème plot
     fig2,blab=plt.subplots()
     blab.set_ylim(0,10*len(tasks)+10)
     fig2.suptitle('{}_tasks'.format(country))
@@ -206,14 +235,14 @@ def gantt_diagram(country):
     blab.set_yticklabels(['{}'.format(task.TaskId) for task in tasks])
     blab.grid(True)
     for task in range(len(tasks)):
-        print(tasks[task].OpeningTime)
-        print(tasks[task].ClosingTime-tasks[task].OpeningTime)
+        #print(tasks[task].OpeningTime)
+        #print(tasks[task].ClosingTime-tasks[task].OpeningTime)
         blab.broken_barh([(tasks[task].OpeningTime,tasks[task].ClosingTime-tasks[task].OpeningTime)],(10*(task+1)-1,2),facecolors=('tab:blue'))
-    plt.savefig('{}_tasks.png'.format(country))
+    plt.savefig('gantt_phase2/{}_tasks.png'.format(country))
 
 
 
 
 
-verification(country)
-gantt_diagram(countryy)
+verification(country, epsilon)
+gantt_diagram(country)

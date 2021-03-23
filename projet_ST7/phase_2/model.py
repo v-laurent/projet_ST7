@@ -3,9 +3,14 @@ from utils import *
 from gurobipy import *
 import matplotlib.pyplot as plt
 
-def best_solution(employees,tasks):
+def best_solution(employees,tasks, threshold):
 
     tasks = [0]+[t for t in tasks if t != 0]    
+    """
+    for i,t in enumerate(tasks[1:]):
+            if t.id_employee !=0:
+                    print(i,t)
+    """
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
 
     #model
@@ -64,7 +69,11 @@ def best_solution(employees,tasks):
                             for i in range(1,number_of_tasks+1)
                             for j in range(number_of_employees+1,number_of_tasks+1)  #i in A*
                             for k in range(1,number_of_employees+1) }
-
+       
+    test_constr = { (i,k) : m.addConstr( P[(k,i)] <= quicksum([ DELTA[(i,j,k)] for j in range(number_of_employees+1,number_of_tasks+1) ]) )
+                            for i in range(1,number_of_tasks+1)
+                            for k in range(1,number_of_employees+1) }
+        
     #all the employees have one and only one lunch time
     lunch_time_constr = {k : m.addConstr( quicksum([ P[(k,i)] for i in range(1, number_of_tasks+1) ]) == 1, name=f'lunch_time_constr_{k}')
                             for k in range(1, number_of_employees+1)}
@@ -94,7 +103,7 @@ def best_solution(employees,tasks):
                                 for k in range(1, number_of_employees+1) }
 
     #--------------------------------------j'ai enlevé le fait qu'on ait le temps de revenir au depot : bonne idée?
-    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - 3.6/(50*60)*d[(k,i,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
+    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration , name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(1,number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
 
@@ -131,56 +140,33 @@ def best_solution(employees,tasks):
                                                                         for k in range(1, number_of_employees+1) ]) <= 1, name=f'subtask_constr_{family}')
         family += tasks[family].number_of_sisters+1
     
-     
-    #sans doute pb on considère des taches qui ne doivent pas etre comptées ?
+    #threshold constraint 
+    nb_tasks_done_expr = quicksum( DELTA[(i,j,k)] for i in range(1, number_of_tasks+1)
+                                                    for j in range(1, number_of_tasks+1)
+                                                    for k in range(1, number_of_employees+1))
+
+    m.addConstr(nb_tasks_done_expr >= threshold, name='threshold_constr')
+
+    #y a moyen qu'il faille le rajouter quand meme un peu meme si j'aime pas trop beaucoup ça, je préfère quand c'est un peu trop plus moins calme
+        
+    m.addConstr(quicksum([DELTA[(i,i,k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1)]) == 0, name='threshold_constr')
+        
+        
+    
 
     #objective
     m.setObjective(quicksum(DELTA[(i,j,k)]*d[(i,j,k)] for i in range(1, number_of_tasks+1)
                                                     for j in range(1, number_of_tasks+1)
                                                     for k in range(1, number_of_employees+1)),GRB.MINIMIZE)
 
-    # Implémentation Python epsilon-Constraint
-    epsilon = 0.1
-    X, Y = [], []
-    m.update()
-    m.optimize()
-    nb_tasks_done_expr = quicksum( DELTA[(i,j,k)] for i in range(1, number_of_tasks+1)
-                                                    for j in range(1, number_of_tasks+1)
-                                                    for k in range(1, number_of_employees+1))
-    it = 0
-    while m.status != GRB.INFEASIBLE:
-        sol = ( m.objVal, nb_tasks_done_expr.getValue() )
-        X.append(sol[0])
-        Y.append(sol[1])
-        print(it,sol)
-        it += 1
-        # -- Ajout de l'epsilon constraint
-        m.addConstr(nb_tasks_done_expr >= nb_tasks_done_expr.getValue() + epsilon, name=f'epsilon_constraint_{it}')
-        # -- Mise à jour du modèle  --
-        m.update()
-        # -- Résolution --
-        m.optimize()
-        
-    k = 1
-    for i, j in zip(X, Y):
-        plt.scatter(i, j, marker='.', label=str((i,j)))
-        plt.annotate(str(k), (i, j))
-        k += 1
-
-    plt.grid(linestyle='--', color='gray')
-
-    plt.xlabel('Travel distance')
-    plt.ylabel('Perturbation pondérée')
-    plt.legend(bbox_to_anchor = (1.05, 1), loc = 2, borderaxespad = 0.)
-    plt.show()
-
-    """
-
     #resolution
     m.update()
     m.optimize()
 
     #returning the results
+    if m.status == GRB.INFEASIBLE:
+            return None
+
     DELTA = { (i,j,k) : DELTA[(i,j,k)].x
             for i in range(1, number_of_tasks+1)
             for j in range(1, number_of_tasks+1)
@@ -194,5 +180,5 @@ def best_solution(employees,tasks):
             for i in range(1, number_of_tasks+1)
             for k in range(1, number_of_employees+1) }
 
-    return DELTA, T, P
-    """
+    return DELTA, T, P, m.ObjVal, nb_tasks_done_expr.getValue()
+    
