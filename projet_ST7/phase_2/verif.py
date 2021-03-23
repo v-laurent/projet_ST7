@@ -135,15 +135,11 @@ def verification(country, epsilon=0.05):
                     print(f"ERROR 4.6 : {employee_name} n'a pas le temps de manger entre les tâches T{i1_bis} et T{i2_bis}")
 
             # 7- lieu de l'indisponibilité de l'employé
-            una_place = False
             for unavailability in employees[k].Unavailabilities :
                 if T_i_startTime[i1] < unavailability.Start and T_i_startTime[i2] > unavailability.Start:
                     eps2 = T_i_startTime[i2] - (T_i_startTime[i1] + tasks[i1_bis].TaskDuration)
-                    if eps2 > trajet(tasks[i1_bis], unavailability) + (unavailability.End - unavailability.Start)+ trajet(unavailability , tasks[i2_bis]):
-                        una_place = True
-
-        if una_place == False:
-            print(f"ERROR 7.3 : {employee_name} n'est pas au bon endroit pendant sa période d'indisponibilité")
+                    if eps2 < trajet(tasks[i1_bis], unavailability) + (unavailability.End - unavailability.Start)+ trajet(unavailability , tasks[i2_bis]):
+                        print(f"ERROR 7.3 : {employee_name} n'est pas au bon endroit pendant sa période d'indisponibilité")
 
         # 8- trajet dernièrer tâche / dépôt
         iN = sorted_indices[-1]
