@@ -7,10 +7,6 @@ def best_solution(employees,tasks, threshold):
     number_of_unavailabilities=0
     for employee in employees[1:]:
         number_of_unavailabilities += len(employee.Unavailabilities)
-<<<<<<< HEAD
-=======
-
->>>>>>> 5fc175c58e1a2bc94f6f81cdc8bd9f9d7143f406
     tasks = [0]+[t for t in tasks if t != 0]    
     """
     for i,t in enumerate(tasks[1:]):
