@@ -4,6 +4,9 @@ from gurobipy import *
 import matplotlib.pyplot as plt
 
 def best_solution(employees,tasks, threshold):
+    number_of_unavailabilities=0
+    for employee in employees[1:]:
+        number_of_unavailabilities += len(employee.Unavailabilities)
 
     tasks = [0]+[t for t in tasks if t != 0]    
     """
@@ -104,7 +107,11 @@ def best_solution(employees,tasks, threshold):
 
     #--------------------------------------j'ai enlevé le fait qu'on ait le temps de revenir au depot : bonne idée?
     avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - 3.6/(50*60)*d[(i,k,k)]*DELTA[(i,k,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
-                                for i in range(1,number_of_tasks+1)
+                                for i in range(number_of_employees+number_of_unavailabilities+1,number_of_tasks+1)
+                                for k in range(1,number_of_employees+1) }
+
+    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration, name=f'avaibility_employe_ub_constr_{i}_{k}' )
+                                for i in range(number_of_employees+1,number_of_employees+number_of_unavailabilities+1)
                                 for k in range(1,number_of_employees+1) }
 
     #level constraint
