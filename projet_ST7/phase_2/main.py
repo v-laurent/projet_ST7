@@ -138,5 +138,6 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-#draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
+#def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=phase):
+draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
 fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
