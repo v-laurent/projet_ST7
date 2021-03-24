@@ -4,14 +4,14 @@ from gurobipy import *
 import matplotlib.pyplot as plt
 
 def best_solution(employees,tasks,number_of_fake_tasks ,threshold):
-
+    
     tasks = [0]+[t for t in tasks if t != 0]    
     
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
 
     #model
     m = Model('PL_phase_1')
-    m.setParam.TimeLimit(20*60)
+    m.setParam('TimeLimit', 20*60)
     #decision variables
     DELTA = { (i,j,k) : m.addVar(vtype=GRB.BINARY, name=f'DELTA_{i}_{j}_{k}') 
             for i in range(1, number_of_tasks+1)
@@ -135,16 +135,11 @@ def best_solution(employees,tasks,number_of_fake_tasks ,threshold):
 
     m.addConstr(nb_tasks_done_expr >= threshold, name='threshold_constr')
 
-<<<<<<< HEAD
     
     m.addConstr(quicksum([DELTA[(i,i,k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1)]) == 0, name='threshold_constr')
         
         
     
-=======
-    #y a moyen qu'il faille le rajouter quand meme un peu meme si j'aime pas trop beaucoup ça, je préfère quand c'est un peu trop plus moins calme
-    m.addConstr(quicksum([DELTA[(i,i,k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1)]) == 0, name='threshold_constr')  
->>>>>>> 5909e9473836434f918f58b1ea39fb9a944d23cd
 
     #objective
     """
