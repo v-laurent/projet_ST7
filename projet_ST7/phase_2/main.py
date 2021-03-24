@@ -17,7 +17,12 @@ from gurobipy import *
 
 country = "Bordeaux"
 employees, tasks = readingData(country)
+
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
+nb_unavailabilities = 0
+for employee in employees[1:]:
+    nb_unavailabilities += len(employee.Unavailabilities)
+
 depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440,[],0,k) for k in range(1,number_of_employees) ]
 
 def sous_taches(tasks):
@@ -55,7 +60,7 @@ def sous_taches(tasks):
 
     return new_tasks
             
-
+#pb quand plusieurs indispinibilitées là !!!!!!!!!!!!!!
 employees_unavailability=[]
 for k in range(1,number_of_employees):
     if len(employees[k].Unavailabilities)!=0: #if the employee has unavailabilities
@@ -69,10 +74,36 @@ new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
 number_of_tasks=len(new_tasks)-1
 number_of_employees=len(employees)-1
 
-##***************************** Model 
+##***************************** epsilon constraint
 
-DELTA, T, P = best_solution(employees,new_tasks)
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,10)
 
+"""
+epsilon = 0.1
+X, Y = [], []
+result = best_solution(employees,new_tasks,0)
+
+it = 0
+
+while result != None:
+    DELTA, T, P, traveled_distance, nb_task_done = result
+    X.append( round(traveled_distance / 1000,2) )
+    Y.append( int(nb_task_done-number_of_employees-nb_unavailabilities) )
+    print(it,traveled_distance,nb_task_done)
+    it += 1
+    result = best_solution(employees, new_tasks, nb_task_done + epsilon)
+    
+for k,(i, j) in enumerate( zip(X, Y) ):
+    plt.scatter(i, j, marker='.', label=str((i,j)))
+    plt.annotate(str(k), (i, j))
+
+plt.grid(linestyle='--', color='gray')
+plt.xlabel('Travel distance (km)')
+plt.ylabel('number of accomplished tasks')
+plt.legend()
+plt.show()
+
+"""
 ##****************************   plot  
 
 latitudes=[[] for employee in range(number_of_employees+1)]
@@ -111,5 +142,5 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
-#fichier_texte(DELTA,T,P,tasks,employees,number_of_tasks,country,phase=phase,instance=instance)
+#draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
+fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)

@@ -6,11 +6,11 @@ import os
 #rayon de la terre en m
 R = 6371000
 ## Phase du projet ##
-phase = "1" 
+phase = "2" 
 #phase = "2"
 #phase = "3"
 ## Instance jeu de données ##
-instance = "1"
+instance = "2"
 #instance = "2"
 #instance = "3"
 #instance = "4"
