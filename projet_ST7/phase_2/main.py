@@ -44,7 +44,10 @@ number_of_fake_tasks = 1 + len(depots) + len(employees_unavailability)
 
 """ To run the code with the first objective function """
 
+#DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,12)
+
 """ To run the code with the 2nd objective function """
+
 DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks, number_of_fake_tasks, 0)
 
 """ To run the epsilon constraint method, and have the polt of the pareto front 
