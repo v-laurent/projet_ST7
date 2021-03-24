@@ -2,6 +2,7 @@ import math
 import gmplot
 from math import sin, cos,sqrt,atan2,radians,acos,asin
 import os
+from classes import *
 
 #rayon de la terre en m
 R = 6371000
@@ -107,6 +108,7 @@ def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities
     
 def sous_taches(tasks):
     new_tasks=[]
+    number_of_tasks = len(tasks)
     for i in range(1,number_of_tasks):
         number_of_sisters=len(tasks[i].Unavailabilities)
         for unava in range(len(tasks[i].Unavailabilities)):

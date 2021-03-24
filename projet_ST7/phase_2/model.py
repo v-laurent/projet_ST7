@@ -3,16 +3,11 @@ from utils import *
 from gurobipy import *
 import matplotlib.pyplot as plt
 
-<<<<<<< HEAD
-def best_solution(employees,tasks, threshold):
+def best_solution(employees,tasks,number_of_fake_tasks,threshold):
     number_of_unavailabilities=0
     for employee in employees[1:]:
         number_of_unavailabilities += len(employee.Unavailabilities)
 
-=======
-def best_solution(employees,tasks,number_of_fake_tasks ,threshold):
-    
->>>>>>> Valentin2
     tasks = [0]+[t for t in tasks if t != 0]    
     
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
