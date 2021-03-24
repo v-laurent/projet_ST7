@@ -1,4 +1,5 @@
 taskId;performed;employeeName;startTime;
+<<<<<<< HEAD
 T1;1;Irena;905.0;
 T2;1;Irena;815.0;
 T3;1;Karol;1047.0;
@@ -18,6 +19,27 @@ T16;0;;;
 T17;1;Karol;899.0;
 T18;1;Karol;823.0;
 T19;1;Karol;781.0;
+=======
+T1;1;Irena;906.0;
+T2;1;Irena;819.0;
+T3;1;Karol;1047.0;
+T4;1;Karol;993.0;
+T5;1;Irena;1013.0;
+T6;1;Karol;786.0;
+T7;0;;;
+T8;1;Irena;951.0;
+T9;0;;;
+T10;0;;;
+T11;1;Karol;670.0;
+T12;0;;;
+T13;1;Karol;907.0;
+T14;1;Irena;703.0;
+T15;1;Irena;861.0;
+T16;0;;;
+T17;1;Karol;874.0;
+T18;1;Karol;940.0;
+T19;1;Karol;481.0;
+>>>>>>> b12d0d54500ce8ad9619c033362492b16d8c8296
 
 employeeName;lunchBreakStartTime;
 Irena;743.0;
