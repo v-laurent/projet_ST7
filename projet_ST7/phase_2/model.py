@@ -7,6 +7,10 @@ def best_solution(employees,tasks, threshold):
     number_of_unavailabilities=0
     for employee in employees[1:]:
         number_of_unavailabilities += len(employee.Unavailabilities)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5fc175c58e1a2bc94f6f81cdc8bd9f9d7143f406
     tasks = [0]+[t for t in tasks if t != 0]    
     """
     for i,t in enumerate(tasks[1:]):
@@ -109,7 +113,11 @@ def best_solution(employees,tasks, threshold):
                                 for i in range(number_of_employees+number_of_unavailabilities+1,number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
 
+<<<<<<< HEAD
     availability_employee_ub_constr_unava = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration, name=f'avaibility_employe_ub_constr_{i}_{k}' )
+=======
+    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration, name=f'avaibility_employe_ub_constr_{i}_{k}' )
+>>>>>>> 5fc175c58e1a2bc94f6f81cdc8bd9f9d7143f406
                                 for i in range(number_of_employees+1,number_of_employees+number_of_unavailabilities+1)
                                 for k in range(1,number_of_employees+1) }
 

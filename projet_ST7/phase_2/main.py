@@ -15,7 +15,7 @@ from gurobipy import *
 
 ##***************************** Reading Data 
 
-country = "Bordeaux"
+country = "Spain"
 employees, tasks = readingData(country)
 
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
@@ -76,7 +76,12 @@ number_of_employees=len(employees)-1
 
 ##***************************** epsilon constraint
 
+<<<<<<< HEAD
 DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,10)
+=======
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,12)
+
+>>>>>>> 5fc175c58e1a2bc94f6f81cdc8bd9f9d7143f406
 """
 epsilon = 0.1
 X, Y = [], []
@@ -142,3 +147,5 @@ for k in range(1,number_of_employees+1):
 
 draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
 fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
+
+print(T[(3,30)])

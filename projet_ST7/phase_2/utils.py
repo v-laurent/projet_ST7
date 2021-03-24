@@ -87,13 +87,12 @@ def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities
                 resultats.append([f'{employees[k].EmployeeName}', 12*60])
         for i in range(1 + number_of_employees, len(new_tasks)):
             if P[(k,i)] == 1:
-                task_ID = new_tasks[i].TaskId
-                task_ID_num = int(task_ID[1:2])
-                if T[(k,i)] + tasks[task_ID_num].TaskDuration <= 12*60:
+                if T[(k,i)] + new_tasks[i].TaskDuration <= 12*60:
                     resultats.append([f'{employees[k].EmployeeName}', 12*60])
                 else :
-                    resultats.append([f'{employees[k].EmployeeName}', T[(k,i)] + tasks[task_ID_num].TaskDuration])
-               
+                    resultats.append([f'{employees[k].EmployeeName}', T[(k,i)] + new_tasks[i].TaskDuration])
+
+
 
     for line in (resultats):
         if len(line) == 4:

@@ -6,7 +6,7 @@ from reading_data import *
 import matplotlib.pyplot as plt
 
 #################################################
-country = 'Bordeaux'
+country = 'Spain'
 dossier_txt = 'fichiers_txt_phase2'
 version = 'V2ByV2'
 #################################################
@@ -26,7 +26,7 @@ def verification(country, epsilon=0.05):
     lunch = lunch[['employeeName','lunchBreakStartTime']]
 
     # Pourcentage de tâches réalisées
-    print("Pourcentage de tâches réalisées : {} %".format((decision['performed'].sum())/number_of_tasks*100))
+    print("Pourcentage de tâches réalisées : {} %".format(round((decision['performed'].sum())/number_of_tasks*100,1)))
 
     # Contraintes
     for i in range(1, number_of_tasks+1):
@@ -35,10 +35,10 @@ def verification(country, epsilon=0.05):
         # vérification que la tâche Ti est faite
         if len(decision[decision['taskId']==task_id].loc[:,'performed'].values) == 0:
             print(f"ERROR : ligne de la tâche {task_id} manquante")
-            break
+            continue
         if decision[decision['taskId']==task_id].loc[:,'performed'].values == 0:
             print(f"Tâche {task_id} non réalisée")
-            break
+            continue
         employee_name = decision[decision['taskId']==task_id].loc[:,'employeeName'].values[0]
         
         k=1
@@ -84,7 +84,7 @@ def verification(country, epsilon=0.05):
         # vérification que l'employé travaille
         if len(T_i_startTime) == 0:
             print(f"{employee_name} n'effectue aucune tâche")
-            break
+            continue
         
         sorted_indices = np.argsort(T_i_startTime)        # indices uniquement des tâches effectuées par le technicien k
         sorted_indices_bis = []                             # utilisables sur tasks (ensemble de toutes les tâches)
@@ -183,8 +183,7 @@ def gantt_diagram(country):
         tasks_id = decision[decision['employeeName']==employee_name].loc[:,'taskId'].values
         T_i_startTime = decision[decision['employeeName']==employee_name].loc[:,'startTime'].values
         if len(T_i_startTime) == 0:
-            print(f"{employee_name} n'effectue aucune tâche")
-            break
+            continue
         sorted_indices = np.argsort(T_i_startTime)          # indices uniquement des tâches effectuées par le technicien k
         sorted_indices_bis = []                             # utilisables sur tasks (ensemble de toutes les tâches)
         for i in sorted_indices:
@@ -192,6 +191,13 @@ def gantt_diagram(country):
                 if tasks[j].TaskId == tasks_id[i]:
                     sorted_indices_bis.append(j)
 
+        # lunch times
+        lunch_time = 0
+        if len(lunch[lunch['employeeName']==employee_name].loc[:,'lunchBreakStartTime'].values)==1:
+            lunch_time = lunch[lunch['employeeName']==employee_name].loc[:,'lunchBreakStartTime'].values[0]
+            lunch_times[k].append((lunch_time, 60))
+
+        # travel time
         end_times=[]
         for task in range(len(tasks_id)):
             task_times[k].append((T_i_startTime[task],tasks[int(tasks_id[task].strip('T'))-1].TaskDuration))
@@ -204,21 +210,30 @@ def gantt_diagram(country):
                 break
             #print("{} vers {}".format(tasks[sorted_indices_bis[i]].TaskId,tasks[sorted_indices_bis[i+1]].TaskId))
             #print("{}".format(trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]])))
-            travel_times[k].append((end_times[i],trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]])))
+            travel_time = trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]])
+            if end_times[i] > lunch_time + 60:
+                travel_times[k].append((end_times[i], travel_time))
+            else:
+                time_until_lunch = lunch_time - end_times[i]
+                if time_until_lunch > travel_time:
+                    travel_times[k].append((end_times[i], travel_time))
+                else :
+                    travel_times[k].append((end_times[i], time_until_lunch))
+                    travel_times[k].append((lunch_time+60, travel_time - time_until_lunch))
+
             #print(end_times[i-1])
             #print(end_times[i]+trajet(tasks[sorted_indices_bis[i]],tasks[sorted_indices_bis[i+1]]))
-        travel_times[k].append((end_times[-1],trajet(employees[k],tasks[sorted_indices_bis[-1]])))
-
-        # lunch times
-        lunch_time = lunch[lunch['employeeName']==employee_name].loc[:,'lunchBreakStartTime'].values[0]
-        lunch_times[k].append((lunch_time, 60))
+        if end_times[-1] < lunch_time + 60:
+            travel_times[k].append((lunch_time+60,trajet(employees[k],tasks[sorted_indices_bis[-1]])))
+        else: 
+            travel_times[k].append((end_times[-1],trajet(employees[k],tasks[sorted_indices_bis[-1]])))
 
         # indisponibilités
         for unavailability in employees[k].Unavailabilities:
             unavailabilities_times[k].append((unavailability.Start, unavailability.End-unavailability.Start))
 
 
-    colors=['pink','orange','blue']
+    colors=['orange','pink','purple','cyan','olive','brown']
     for i in range(len(employees)):
         gnt.broken_barh(task_times[i],(10*(i+1)-1,2), facecolors=('tab:{}'.format(colors[i])))
         gnt.broken_barh(travel_times[i],(10*(i+1)-2,0.5),facecolors=('tab:red'))
@@ -237,10 +252,28 @@ def gantt_diagram(country):
     blab.set_yticks([10*(y+1) for y in range(len(tasks))])
     blab.set_yticklabels(['{}'.format(task.TaskId) for task in tasks])
     blab.grid(True)
-    for task in range(len(tasks)):
-        #print(tasks[task].OpeningTime)
-        #print(tasks[task].ClosingTime-tasks[task].OpeningTime)
-        blab.broken_barh([(tasks[task].OpeningTime,tasks[task].ClosingTime-tasks[task].OpeningTime)],(10*(task+1)-1,2),facecolors=('tab:blue'))
+    for i in range(len(tasks)):
+        task_id = tasks[i].TaskId
+        T_i_startTime = decision[decision['taskId']==task_id].loc[:,'startTime'].values
+        
+        # change la couleur si la tâche Ti est faite
+        color = 'gray'
+        if decision[decision['taskId']==task_id].loc[:,'performed'].values == 1:
+            employee_name = decision[decision['taskId']==task_id].loc[:,'employeeName'].values[0]
+            for k in range(len(employees)):
+                if employees[k].EmployeeName == employee_name:
+                    color = colors[k]
+                    blab.broken_barh([(int(T_i_startTime[0]), tasks[i].TaskDuration)],(10*(i+1)-1,3),facecolors=(f'tab:red'))
+
+        if len(tasks[i].Unavailabilities) == 0:
+            blab.broken_barh([(tasks[i].OpeningTime,tasks[i].ClosingTime-tasks[i].OpeningTime)],(10*(i+1)-1,2),facecolors=(f'tab:{color}'))
+        else :
+            start_time = tasks[i].OpeningTime
+            for unavailability in tasks[k].Unavailabilities:
+                blab.broken_barh([(start_time,unavailability.Start-start_time)],(10*(i+1)-1,2),facecolors=(f'tab:{color}'))
+                start_time = unavailability.End
+            blab.broken_barh([(start_time,tasks[i].ClosingTime-start_time)],(10*(i+1)-1,2),facecolors=(f'tab:{color}'))
+
     plt.savefig('gantt_phase2/{}_tasks.png'.format(country))
 
 
