@@ -4,7 +4,9 @@ from gurobipy import *
 import matplotlib.pyplot as plt
 
 def best_solution(employees,tasks, threshold):
-
+    number_of_unavailabilities=0
+    for employee in employees[1:]:
+        number_of_unavailabilities += len(employee.Unavailabilities)
     tasks = [0]+[t for t in tasks if t != 0]    
     """
     for i,t in enumerate(tasks[1:]):
@@ -15,7 +17,7 @@ def best_solution(employees,tasks, threshold):
 
     #model
     m = Model('PL_phase_1')
-
+    m.setParam('TimeLimit', 60*20)
     #decision variables
     DELTA = { (i,j,k) : m.addVar(vtype=GRB.BINARY, name=f'DELTA_{i}_{j}_{k}') 
             for i in range(1, number_of_tasks+1)
@@ -99,12 +101,16 @@ def best_solution(employees,tasks, threshold):
 
     #employee_available
     avaibility_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
-                                for i in range(1, number_of_tasks+1)
+                                for i in range(number_of_employees+number_of_unavailabilities+1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
     #--------------------------------------j'ai enlevé le fait qu'on ait le temps de revenir au depot : bonne idée?
     avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - 3.6/(50*60)*d[(i,k,k)]*DELTA[(i,k,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
-                                for i in range(1,number_of_tasks+1)
+                                for i in range(number_of_employees+number_of_unavailabilities+1,number_of_tasks+1)
+                                for k in range(1,number_of_employees+1) }
+
+    availability_employee_ub_constr_unava = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration, name=f'avaibility_employe_ub_constr_{i}_{k}' )
+                                for i in range(number_of_employees+1,number_of_employees+number_of_unavailabilities+1)
                                 for k in range(1,number_of_employees+1) }
 
     #level constraint

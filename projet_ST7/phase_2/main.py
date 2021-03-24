@@ -77,7 +77,6 @@ number_of_employees=len(employees)-1
 ##***************************** epsilon constraint
 
 DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,10)
-
 """
 epsilon = 0.1
 X, Y = [], []
@@ -102,7 +101,6 @@ plt.xlabel('Travel distance (km)')
 plt.ylabel('number of accomplished tasks')
 plt.legend()
 plt.show()
-
 """
 ##****************************   plot  
 
@@ -142,5 +140,5 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-#draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
+draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
 fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
