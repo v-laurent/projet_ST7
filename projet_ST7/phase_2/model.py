@@ -103,7 +103,7 @@ def best_solution(employees,tasks, threshold):
                                 for k in range(1, number_of_employees+1) }
 
     #--------------------------------------j'ai enlevé le fait qu'on ait le temps de revenir au depot : bonne idée?
-    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration , name=f'avaibility_employe_ub_constr_{i}_{k}' )
+    avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - 3.6/(50*60)*d[(i,k,k)]*DELTA[(i,k,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(1,number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
 
