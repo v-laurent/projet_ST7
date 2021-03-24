@@ -10,10 +10,9 @@ from model import *
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-
 from gurobipy import *
 
-##***************************** Reading Data 
+##***************************** Reading Data  ##*********************************
 
 country = "Bordeaux"
 employees, tasks = readingData(country)
@@ -24,43 +23,8 @@ for employee in employees[1:]:
     nb_unavailabilities += len(employee.Unavailabilities)
 
 depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440,[],0,k) for k in range(1,number_of_employees) ]
-
-def sous_taches(tasks):
-    new_tasks=[]
-    for i in range(1,number_of_tasks):
-        number_of_sisters=len(tasks[i].Unavailabilities)
-        for unava in range(len(tasks[i].Unavailabilities)):
-            if tasks[i].Unavailabilities[unava].End >= tasks[i].ClosingTime:
-                number_of_sisters-=1
-            if tasks[i].Unavailabilities[unava].Start == tasks[i].OpeningTime:
-                number_of_sisters-=1
-        if len(tasks[i].Unavailabilities)==0:
-            new_tasks.append(tasks[i])
-        else:
-            start=tasks[i].OpeningTime
-            end=min(tasks[i].Unavailabilities[0].Start,tasks[i].ClosingTime)
-            if tasks[i].Unavailabilities[0].Start != 8*60:
-                new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
-                                tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
-                                start, end, [],number_of_sisters)) 
-            if end==tasks[i].ClosingTime:
-                continue
-            for sous_tache in range(len(tasks[i].Unavailabilities)):
-                start=tasks[i].Unavailabilities[sous_tache].End
-                if sous_tache == len(tasks[i].Unavailabilities)-1:
-                    end=tasks[i].ClosingTime
-                else:
-                    end=min(tasks[i].Unavailabilities[sous_tache+1].Start,tasks[i].ClosingTime)
-                if end>start:
-                    new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
-                            tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
-                            start, end, [], number_of_sisters))
-                if end == tasks[i].ClosingTime:
-                    break
-
-    return new_tasks
             
-#pb quand plusieurs indispinibilitées là !!!!!!!!!!!!!!
+
 employees_unavailability=[]
 for k in range(1,number_of_employees):
     if len(employees[k].Unavailabilities)!=0: #if the employee has unavailabilities
@@ -68,7 +32,7 @@ for k in range(1,number_of_employees):
                         employees[k].Unavailabilities[0].End-employees[k].Unavailabilities[0].Start,
                         "",0,employees[k].Unavailabilities[0].Start, employees[k].Unavailabilities[0].End,
                         [],0,k))
-    # else:
+ 
     #     employees_unavailability.append(0)
 
 new_tasks = [0]+ depots + employees_unavailability + sous_taches(tasks)
@@ -76,12 +40,16 @@ number_of_tasks=len(new_tasks)-1
 number_of_employees=len(employees)-1
 number_of_fake_tasks = 1 + len(depots) + len(employees_unavailability)
 
-##***************************** epsilon constraint
+##***************************** epsilon constraint  ##****************************
 
+""" To run the code with the first objective function """
+
+""" To run the code with the 2nd objective function """
 DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks, number_of_fake_tasks, 0)
 
-"""
-epsilon = 0.1
+""" To run the epsilon constraint method, and have the polt of the pareto front 
+
+epsilon = 0.1  #the step of the epsilon constraint 
 X, Y = [], []
 result = best_solution(employees,new_tasks,0)
 
@@ -106,7 +74,7 @@ plt.legend()
 plt.show()
 
 """
-##****************************   plot  
+##****************************   plot  ##************************
 
 latitudes=[[] for employee in range(number_of_employees+1)]
 longitudes=[[] for employee in range(number_of_employees+1)]
@@ -139,6 +107,5 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-#def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=phase):
 draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
 fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)

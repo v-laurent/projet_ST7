@@ -10,7 +10,7 @@ def best_solution(employees,tasks,number_of_fake_tasks ,threshold):
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
 
     #model
-    m = Model('PL_phase_1')
+    m = Model('PL_phase_2')
     m.setParam('TimeLimit', 20*60)
     #decision variables
     DELTA = { (i,j,k) : m.addVar(vtype=GRB.BINARY, name=f'DELTA_{i}_{j}_{k}') 
@@ -141,12 +141,14 @@ def best_solution(employees,tasks,number_of_fake_tasks ,threshold):
         
     
 
-    #objective
+    ##########  Objective ##########
+    # 1st Objective function #
     """
     m.setObjective(quicksum(DELTA[(i,j,k)]*d[(i,j,k)] for i in range(1, number_of_tasks+1)
                                                     for j in range(1, number_of_tasks+1)
                                                     for k in range(1, number_of_employees+1)),GRB.MINIMIZE)
     """
+    # 2nd objectif function #
     lambda1 = 0.0002
     lambda2 = 0.5
     m.setObjective( lambda2*quicksum([ DELTA[(i,j,k)]*tasks[j].TaskDuration for i in range(1, number_of_tasks+1)
