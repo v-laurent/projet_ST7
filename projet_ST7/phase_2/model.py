@@ -3,14 +3,10 @@ from utils import *
 from gurobipy import *
 import matplotlib.pyplot as plt
 
-def best_solution(employees,tasks, threshold):
+def best_solution(employees,tasks,number_of_fake_tasks ,threshold):
 
     tasks = [0]+[t for t in tasks if t != 0]    
-    """
-    for i,t in enumerate(tasks[1:]):
-            if t.id_employee !=0:
-                    print(i,t)
-    """
+    
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
 
     #model
@@ -89,16 +85,16 @@ def best_solution(employees,tasks, threshold):
                                         for i in range(1, number_of_tasks+1) }
 
     #task_available
-    avaibility_task_lb_constr = { (i,k) : m.addConstr( tasks[i].OpeningTime <= T[(k,i)], name=f'avaibility_task_lb_constr_{i}_{k}' )
+    availability_task_lb_constr = { (i,k) : m.addConstr( tasks[i].OpeningTime <= T[(k,i)], name=f'avaibility_task_lb_constr_{i}_{k}' )
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
-    avaibility_task_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= tasks[i].ClosingTime - tasks[i].TaskDuration , name=f'avaibility_task_ub_constr_{i}_{k}' )
+    availability_task_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= tasks[i].ClosingTime - tasks[i].TaskDuration , name=f'avaibility_task_ub_constr_{i}_{k}' )
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
     #employee_available
-    avaibility_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
+    availability_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
@@ -148,16 +144,22 @@ def best_solution(employees,tasks, threshold):
     m.addConstr(nb_tasks_done_expr >= threshold, name='threshold_constr')
 
     #y a moyen qu'il faille le rajouter quand meme un peu meme si j'aime pas trop beaucoup ça, je préfère quand c'est un peu trop plus moins calme
-        
-    m.addConstr(quicksum([DELTA[(i,i,k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1)]) == 0, name='threshold_constr')
-        
-        
-    
+    m.addConstr(quicksum([DELTA[(i,i,k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1)]) == 0, name='threshold_constr')  
 
     #objective
+    """
     m.setObjective(quicksum(DELTA[(i,j,k)]*d[(i,j,k)] for i in range(1, number_of_tasks+1)
                                                     for j in range(1, number_of_tasks+1)
                                                     for k in range(1, number_of_employees+1)),GRB.MINIMIZE)
+    """
+    lambda1 = 0.003
+    lambda2 = 1.5
+    m.setObjective( lambda2*quicksum([ DELTA[(i,j,k)]*tasks[j].TaskDuration for i in range(1, number_of_tasks+1)
+                                                               for j in range(number_of_fake_tasks, number_of_tasks+1)
+                                                               for k in range(1, number_of_employees+1) ]) 
+                    - lambda1*quicksum([ DELTA[(i,j,k)]*d[(i,j,k)] for i in range(1, number_of_tasks+1)
+                                                               for j in range(1, number_of_tasks+1)
+                                                               for k in range(1, number_of_employees+1) ]),GRB.MAXIMIZE)
 
     #resolution
     m.update()
