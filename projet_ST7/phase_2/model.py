@@ -41,16 +41,9 @@ def best_solution(employees,tasks, threshold):
             for j in range(1, number_of_tasks+1)  
             for k in range(1, number_of_employees+1) }
 
-    #constraints
+############# Constraints #############
 
-    #on peut s'en passer
-    """
-    #all the tasks have to be done at most 1 time
-    tasks_done_constr = {i : m.addConstr( quicksum( [ DELTA[(i,j,k)] 
-                                                        for j in range(1,number_of_tasks+1)
-                                                        for k in range(1,number_of_employees+1) ]) <= 1, name=f'task_possibly_done_constr_{i}')
-                            for i in range(1, number_of_tasks+1)}
-    """
+
     
     #temporal constraints
     oo = 1440
@@ -102,7 +95,6 @@ def best_solution(employees,tasks, threshold):
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
-    #--------------------------------------j'ai enlevé le fait qu'on ait le temps de revenir au depot : bonne idée?
     avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - 3.6/(50*60)*d[(i,k,k)]*DELTA[(i,k,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(1,number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
@@ -147,8 +139,7 @@ def best_solution(employees,tasks, threshold):
 
     m.addConstr(nb_tasks_done_expr >= threshold, name='threshold_constr')
 
-    #y a moyen qu'il faille le rajouter quand meme un peu meme si j'aime pas trop beaucoup ça, je préfère quand c'est un peu trop plus moins calme
-        
+    
     m.addConstr(quicksum([DELTA[(i,i,k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1)]) == 0, name='threshold_constr')
         
         
