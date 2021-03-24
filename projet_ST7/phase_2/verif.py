@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 #################################################
 country = 'Bordeaux'
-dossier_txt = 'fichiers_txt_phase1'
-version = 'V1ByV1'
+dossier_txt = 'fichiers_txt_phase2'
+version = 'V2ByV2'
 #################################################
 # précision choisie pour les warning (en minutes)
 epsilon = 1
@@ -135,15 +135,11 @@ def verification(country, epsilon=0.05):
                     print(f"ERROR 4.6 : {employee_name} n'a pas le temps de manger entre les tâches T{i1_bis} et T{i2_bis}")
 
             # 7- lieu de l'indisponibilité de l'employé
-            una_place = False
             for unavailability in employees[k].Unavailabilities :
                 if T_i_startTime[i1] < unavailability.Start and T_i_startTime[i2] > unavailability.Start:
                     eps2 = T_i_startTime[i2] - (T_i_startTime[i1] + tasks[i1_bis].TaskDuration)
-                    if eps2 > trajet(tasks[i1_bis], unavailability) + (unavailability.End - unavailability.Start)+ trajet(unavailability , tasks[i2_bis]):
-                        una_place = True
-
-        if una_place == False:
-            print(f"ERROR 7.3 : {employee_name} n'est pas au bon endroit pendant sa période d'indisponibilité")
+                    if eps2 < trajet(tasks[i1_bis], unavailability) + (unavailability.End - unavailability.Start)+ trajet(unavailability , tasks[i2_bis]):
+                        print(f"ERROR 7.3 : {employee_name} n'est pas au bon endroit pendant sa période d'indisponibilité")
 
         # 8- trajet dernièrer tâche / dépôt
         iN = sorted_indices[-1]
@@ -175,6 +171,7 @@ def gantt_diagram(country):
     task_times=[[] for _ in range(len(employees))]
     travel_times=[[] for _ in range(len(employees))]
     lunch_times=[[] for _ in range(len(employees))]
+    unavailabilities_times=[[] for _ in range(len(employees))]
 
     decision = pd.read_csv(f"{dossier_txt}/Solution{country}{version}.txt", sep=';', nrows=number_of_tasks)
     decision = decision[['taskId','performed','employeeName','startTime']]
@@ -216,11 +213,17 @@ def gantt_diagram(country):
         lunch_time = lunch[lunch['employeeName']==employee_name].loc[:,'lunchBreakStartTime'].values[0]
         lunch_times[k].append((lunch_time, 60))
 
+        # indisponibilités
+        for unavailability in employees[k].Unavailabilities:
+            unavailabilities_times[k].append((unavailability.Start, unavailability.End-unavailability.Start))
+
+
     colors=['pink','orange','blue']
     for i in range(len(employees)):
         gnt.broken_barh(task_times[i],(10*(i+1)-1,2), facecolors=('tab:{}'.format(colors[i])))
         gnt.broken_barh(travel_times[i],(10*(i+1)-2,0.5),facecolors=('tab:red'))
         gnt.broken_barh(lunch_times[i],(10*(i+1)-3,0.5),facecolors=('tab:green'))
+        gnt.broken_barh(unavailabilities_times[i],(10*(i+1)-3,0.5),facecolors=('tab:blue'))
     
     plt.vlines([12*60, 14*60], 0, 10*(number_of_employees+1), 'red', 'dashed', alpha=0.5)
     plt.savefig('gantt_phase2/{}.png'.format(country))

@@ -77,8 +77,9 @@ number_of_employees=len(employees)-1
 
 ##***************************** epsilon constraint
 
-#best_solution(employees, new_tasks,10)
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,10)
 
+"""
 epsilon = 0.1
 X, Y = [], []
 result = best_solution(employees,new_tasks,0)
@@ -103,7 +104,7 @@ plt.ylabel('number of accomplished tasks')
 plt.legend()
 plt.show()
 
-
+"""
 ##****************************   plot  
 
 latitudes=[[] for employee in range(number_of_employees+1)]
