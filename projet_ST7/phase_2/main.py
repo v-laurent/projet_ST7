@@ -71,13 +71,14 @@ for k in range(1,number_of_employees):
     # else:
     #     employees_unavailability.append(0)
 
-new_tasks = [0]+ depots + employees_unavailability+ sous_taches(tasks)
+new_tasks = [0]+ depots + employees_unavailability + sous_taches(tasks)
 number_of_tasks=len(new_tasks)-1
 number_of_employees=len(employees)-1
+number_of_fake_tasks = 1 + len(depots) + len(employees_unavailability)
 
 ##***************************** epsilon constraint
 
-DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,10)
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks, number_of_fake_tasks, 0)
 
 """
 epsilon = 0.1
@@ -138,5 +139,6 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-#draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
+#def draw(latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=phase):
+draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
 fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
