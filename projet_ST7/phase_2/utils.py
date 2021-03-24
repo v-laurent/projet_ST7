@@ -6,12 +6,12 @@ import os
 #rayon de la terre en m
 R = 6371000
 ## Phase du projet ##
-phase = "2" 
-#phase = "2"
+#phase = "1" 
+phase = "2"
 #phase = "3"
 ## Instance jeu de données ##
+#instance = "1"
 instance = "2"
-#instance = "2"
 #instance = "3"
 #instance = "4"
 
@@ -50,7 +50,7 @@ def draw(employees,latitude_list_list,longitude_list_list,task_numbers,name,DELT
             gmap1.marker(latitude_list_list[employee][point],longitude_list_list[employee][point],label="{}".format(task_numbers[employee][point])
             ,title=employees[employee].EmployeeName)
     gmap1.draw( "{}".format(name))
-
+    
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
@@ -103,3 +103,39 @@ def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities
             texte.write("{};{};\n".format(line[0],line[1]))
     
     print(resultats) 
+
+    
+def sous_taches(tasks):
+    new_tasks=[]
+    for i in range(1,number_of_tasks):
+        number_of_sisters=len(tasks[i].Unavailabilities)
+        for unava in range(len(tasks[i].Unavailabilities)):
+            if tasks[i].Unavailabilities[unava].End >= tasks[i].ClosingTime:
+                number_of_sisters-=1
+            if tasks[i].Unavailabilities[unava].Start == tasks[i].OpeningTime:
+                number_of_sisters-=1
+        if len(tasks[i].Unavailabilities)==0:
+            new_tasks.append(tasks[i])
+        else:
+            start=tasks[i].OpeningTime
+            end=min(tasks[i].Unavailabilities[0].Start,tasks[i].ClosingTime)
+            if tasks[i].Unavailabilities[0].Start != 8*60:
+                new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
+                                tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
+                                start, end, [],number_of_sisters)) 
+            if end==tasks[i].ClosingTime:
+                continue
+            for sous_tache in range(len(tasks[i].Unavailabilities)):
+                start=tasks[i].Unavailabilities[sous_tache].End
+                if sous_tache == len(tasks[i].Unavailabilities)-1:
+                    end=tasks[i].ClosingTime
+                else:
+                    end=min(tasks[i].Unavailabilities[sous_tache+1].Start,tasks[i].ClosingTime)
+                if end>start:
+                    new_tasks.append(TTask(tasks[i].TaskId,tasks[i].Latitude,tasks[i].Longitude,
+                            tasks[i].TaskDuration,tasks[i].Skill, tasks[i].Level,
+                            start, end, [], number_of_sisters))
+                if end == tasks[i].ClosingTime:
+                    break
+
+    return new_tasks

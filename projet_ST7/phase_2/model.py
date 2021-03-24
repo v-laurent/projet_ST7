@@ -3,22 +3,23 @@ from utils import *
 from gurobipy import *
 import matplotlib.pyplot as plt
 
+<<<<<<< HEAD
 def best_solution(employees,tasks, threshold):
     number_of_unavailabilities=0
     for employee in employees[1:]:
         number_of_unavailabilities += len(employee.Unavailabilities)
 
+=======
+def best_solution(employees,tasks,number_of_fake_tasks ,threshold):
+    
+>>>>>>> Valentin2
     tasks = [0]+[t for t in tasks if t != 0]    
-    """
-    for i,t in enumerate(tasks[1:]):
-            if t.id_employee !=0:
-                    print(i,t)
-    """
+    
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
 
     #model
-    m = Model('PL_phase_1')
-
+    m = Model('PL_phase_2')
+    m.setParam('TimeLimit', 20*60)
     #decision variables
     DELTA = { (i,j,k) : m.addVar(vtype=GRB.BINARY, name=f'DELTA_{i}_{j}_{k}') 
             for i in range(1, number_of_tasks+1)
@@ -44,16 +45,9 @@ def best_solution(employees,tasks, threshold):
             for j in range(1, number_of_tasks+1)  
             for k in range(1, number_of_employees+1) }
 
-    #constraints
+############# Constraints #############
 
-    #on peut s'en passer
-    """
-    #all the tasks have to be done at most 1 time
-    tasks_done_constr = {i : m.addConstr( quicksum( [ DELTA[(i,j,k)] 
-                                                        for j in range(1,number_of_tasks+1)
-                                                        for k in range(1,number_of_employees+1) ]) <= 1, name=f'task_possibly_done_constr_{i}')
-                            for i in range(1, number_of_tasks+1)}
-    """
+
     
     #temporal constraints
     oo = 1440
@@ -92,20 +86,19 @@ def best_solution(employees,tasks, threshold):
                                         for i in range(1, number_of_tasks+1) }
 
     #task_available
-    avaibility_task_lb_constr = { (i,k) : m.addConstr( tasks[i].OpeningTime <= T[(k,i)], name=f'avaibility_task_lb_constr_{i}_{k}' )
+    availability_task_lb_constr = { (i,k) : m.addConstr( tasks[i].OpeningTime <= T[(k,i)], name=f'avaibility_task_lb_constr_{i}_{k}' )
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
-    avaibility_task_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= tasks[i].ClosingTime - tasks[i].TaskDuration , name=f'avaibility_task_ub_constr_{i}_{k}' )
+    availability_task_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= tasks[i].ClosingTime - tasks[i].TaskDuration , name=f'avaibility_task_ub_constr_{i}_{k}' )
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
     #employee_available
-    avaibility_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
+    availability_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
                                 for i in range(1, number_of_tasks+1)
                                 for k in range(1, number_of_employees+1) }
 
-    #--------------------------------------j'ai enlevé le fait qu'on ait le temps de revenir au depot : bonne idée?
     avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - 3.6/(50*60)*d[(i,k,k)]*DELTA[(i,k,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(number_of_employees+number_of_unavailabilities+1,number_of_tasks+1)
                                 for k in range(1,number_of_employees+1) }
@@ -154,17 +147,28 @@ def best_solution(employees,tasks, threshold):
 
     m.addConstr(nb_tasks_done_expr >= threshold, name='threshold_constr')
 
-    #y a moyen qu'il faille le rajouter quand meme un peu meme si j'aime pas trop beaucoup ça, je préfère quand c'est un peu trop plus moins calme
-        
+    
     m.addConstr(quicksum([DELTA[(i,i,k)] for i in range(1, number_of_tasks+1) for k in range(1, number_of_employees+1)]) == 0, name='threshold_constr')
         
         
     
 
-    #objective
+    ##########  Objective ##########
+    # 1st Objective function #
+    """
     m.setObjective(quicksum(DELTA[(i,j,k)]*d[(i,j,k)] for i in range(1, number_of_tasks+1)
                                                     for j in range(1, number_of_tasks+1)
                                                     for k in range(1, number_of_employees+1)),GRB.MINIMIZE)
+    """
+    # 2nd objectif function #
+    lambda1 = 0.0002
+    lambda2 = 0.5
+    m.setObjective( lambda2*quicksum([ DELTA[(i,j,k)]*tasks[j].TaskDuration for i in range(1, number_of_tasks+1)
+                                                               for j in range(number_of_fake_tasks, number_of_tasks+1)
+                                                               for k in range(1, number_of_employees+1) ]) 
+                    - lambda1*quicksum([ DELTA[(i,j,k)]*d[(i,j,k)] for i in range(1, number_of_tasks+1)
+                                                               for j in range(1, number_of_tasks+1)
+                                                               for k in range(1, number_of_employees+1) ]),GRB.MAXIMIZE)
 
     #resolution
     m.update()
