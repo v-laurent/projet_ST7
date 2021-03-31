@@ -70,12 +70,13 @@ def best_solution(employees,tasks,number_of_fake_tasks,threshold):
     lunch_time_constr = {k : m.addConstr( quicksum([ P[(k,i)] for i in range(1, number_of_tasks+1) ]) == 1, name=f'lunch_time_constr_{k}')
                             for k in range(1, number_of_employees+1)}
 
-    #the lunch time begins after 12am
-    beggining_lunch_time_constr = {(k,i) : m.addConstr( T[(k,i)] + P[(k,i)]*tasks[i].TaskDuration + (1-P[(k,i)])*oo >= 12*60, name = f'beggining_lunch_time_constr_{k}_{i}')
+    #task after lunchbreak time begins at least from 1
+    beggining_lunch_time_constr = {(k,i,j) : m.addConstr( T[(k,j)] + (1-X[(i,j,k)])*oo >= 13*60, name = f'beggining_lunch_time_constr_{k}_{i}')
                                         for k in range(1, number_of_employees+1)
-                                        for i in range(1, number_of_tasks+1) }
+                                        for i in range(1, number_of_tasks+1)
+                                        for j in range(1, number_of_tasks+1)  }
 
-    #the lunch time begins before 13pm
+    #the lunch time begins before 1 pm
     ending_lunch_time_constr = {(k,i) : m.addConstr( T[(k,i)] + P[(k,i)]*tasks[i].TaskDuration + 2*(P[(k,i)]-1)*oo <= 13*60, name = f'ending_lunch_time_constr_{k}_{i}')
                                         for k in range(1, number_of_employees+1)
                                         for i in range(1, number_of_tasks+1) }
