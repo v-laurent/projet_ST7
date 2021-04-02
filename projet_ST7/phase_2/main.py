@@ -14,7 +14,7 @@ from gurobipy import *
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Bordeaux"
+country = "Australia"
 employees, tasks = readingData(country)
 
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
@@ -41,7 +41,8 @@ number_of_employees=len(employees)-1
 number_of_fake_tasks = 1 + len(depots) + len(employees_unavailability)
 
 ##***************************** epsilon constraint  ##****************************
-
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,number_of_employees+nb_unavailabilities,0)
+'''
 <<<<<<< HEAD
 <<<<<<< HEAD
 DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,10)
@@ -49,6 +50,7 @@ DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_task
 DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,12)
 
 >>>>>>> 5fc175c58e1a2bc94f6f81cdc8bd9f9d7143f406
+
 """
 epsilon = 0.1
 =======
@@ -87,6 +89,7 @@ plt.ylabel('number of accomplished tasks')
 plt.legend()
 plt.show()
 """
+'''
 ##****************************   plot  ##************************
 
 latitudes=[[] for employee in range(number_of_employees+1)]
