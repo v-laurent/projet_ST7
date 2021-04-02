@@ -110,6 +110,8 @@ def remove_associated_tasks(tasks_to_do,i_task):
     # to be modified for taking into account the subtasks
     tasks_to_do.remove(i_task)  # modifies the list tasks_to_do by 'effet de bord'
 
+def choose_employee(routes):
+    
 
 def populate_routes(routes):
     tasks_to_do=tasks_to_do_list()
@@ -133,6 +135,7 @@ def populate_routes(routes):
         routes[k]=route
     return routes
 
+    
 routes=populate_routes(routes)
 print('Route: ', routes)
 
