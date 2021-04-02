@@ -53,47 +53,47 @@ for i in range(1,len(new_tasks)):
 
 routes=[0,[(1,480),(4,600),(1,1080)],[(2,480),(2,1080)]] 
 def travels_in_route(route): 
-    # allows to create couples of origin-destination 
+    '''# allows to create couples of origin-destination 
     #example: with route=[(1,480),(2,600),(1,1080)]
-    # travels(route) will return [[(1,480),(2,600)],[(2,600),(1,1080)]]
+    # travels(route) will return [[(1,480),(2,600)],[(2,600),(1,1080)]]'''
     res=[]
     for i in range(1,len(route)):
         res.append([route[i-1],route[i]])
     return res
 
 def ending_time(travel,i_task):
-    # takes arguments the travel (origin-destination) and the index of the task we want to add
-    #return the minimal time it will take to reach the destination by going through the task i_task
+    '''# takes arguments the travel (origin-destination) and the index of the task we want to add
+    #return the minimal time it will take to reach the destination by going through the task i_task'''
     i_depart=travel[0][0]
     i_arrivee=travel[1][0]
     t_depart=travel[0][1]
     return t_depart+ new_tasks[i_depart].TaskDuration + trajet(new_tasks[i_depart],new_tasks[i_task]) + new_tasks[i_task].TaskDuration + trajet(new_tasks[i_task],new_tasks[i_arrivee])
 
 def starting_time(travel,i_task):
-    # takes arguments the travel (origin-destination) and the index of the task we want to add
-    #return the minimal time the task i_task will start 
+    '''# takes arguments the travel (origin-destination) and the index of the task we want to add
+    #return the minimal time the task i_task will start '''
     i_depart=travel[0][0]
     t_depart=travel[0][1]
     return int(t_depart+ new_tasks[i_depart].TaskDuration + trajet(new_tasks[i_depart],new_tasks[i_task])+1)
 
 
 def travel_time_possible(travel,i_task):
-    #takes as an argument the index i_task of a task
-    #verifies if adding the task i_task to the travel (origin-destination) is possible
+    '''#takes as an argument the index i_task of a task
+    #verifies if adding the task i_task to the travel (origin-destination) is possible'''
     t_arrivee=travel[1][1]
     if ending_time(travel,i_task)<=t_arrivee:
         return True
     return False
 
 def closest_task(i_departure,i_tasks):
-    #takes as an argument the indices i_departure and i_tasks of the departure task and of the tasks 
-    #from which we want to get the closest one
+    '''takes as an argument the indices i_departure and i_tasks of the departure task and of the tasks 
+    from which we want to get the closest one'''
     distances={i:trajet(new_tasks[i_departure],new_tasks[i]) for i in i_tasks}
     sorted_d = sorted(distances.items(), key=operator.itemgetter(1))
     return (sorted_d)[0][0]
 
 def add_task_to_route(route,i_task,travel):
-    # adds the task i_task to the route just after i_departure
+    ''' adds the task i_task to the route just after the task travel[0][0] (the index of the deparature) '''
     new_route=[]
     added=False
     for location in route:
@@ -103,15 +103,39 @@ def add_task_to_route(route,i_task,travel):
             added=True
     return new_route
 
-def tasks_to_do_list(): #to be modified in the future (adapted to each worker)
+def tasks_to_do_list(): 
+    '''to be modified in the future (adapted to each worker)'''
     return list(range(number_of_fake_tasks,number_of_tasks+1))
 
 def remove_associated_tasks(tasks_to_do,i_task):
-    # to be modified for taking into account the subtasks
+    '''
+     still needs to be modified for taking into account the subtasks
+     '''
     tasks_to_do.remove(i_task)  # modifies the list tasks_to_do by 'effet de bord'
 
-def choose_employee(routes):
-    
+def choose_employee(routes,excluded_employees):
+    '''
+    take as arguments the routes of all the employees and a list containing all the employees to
+     whom we cannot affect tasks anymore
+    '''  
+    worked_times_dict=dict()
+    possible_employees=list(range(1,number_of_employees+1))
+    for element in excluded_employees:
+        possible_employees.remove(element)
+    if len(possible_employees)==0:
+        return False
+    for employee in possible_employees:
+        sum_employee=0
+        for task_done in routes[employee]:
+            sum_employee+=new_tasks[task_done[0]].TaskDuration
+            worked_times_dict[employee]=sum_employee
+    sorted_wtd=sorted(worked_times_dict.items(),key=operator.itemgetter(1))
+    print(sorted_wtd)
+    return sorted_wtd[0][0]
+print('------------------------la-------------------------------------')
+print(choose_employee([0, [(1, 480), (14, 482), (14, 523), (4, 600), (23, 754), (5, 900), (4, 736), (15, 895), (4, 736), (1, 1080)], [(2, 480), 
+(29, 509), (27, 803), (2, 1080)]],[]))
+
 
 def populate_routes(routes):
     tasks_to_do=tasks_to_do_list()
@@ -135,7 +159,7 @@ def populate_routes(routes):
         routes[k]=route
     return routes
 
-    
+print('++++++++',choose_employee(populate_routes(routes)))
 routes=populate_routes(routes)
 print('Route: ', routes)
 

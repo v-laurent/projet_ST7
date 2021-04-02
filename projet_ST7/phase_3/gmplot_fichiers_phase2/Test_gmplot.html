@@ -8,7 +8,7 @@
     function initialize() {
         var map = new google.maps.Map(document.getElementById("map_canvas"), {
             zoom: 10,
-            center: new google.maps.LatLng(40.174951, -2.647762)
+            center: new google.maps.LatLng(40.160022, -2.669699)
         });
 
         var marker_icon_FF0000 = {
@@ -20,6 +20,14 @@
             position: new google.maps.LatLng(40.164474, -2.587292),
             title: "Juan",
             label: "D",
+            icon: marker_icon_FF0000,
+            map: map
+        });
+
+        new google.maps.Marker({
+            position: new google.maps.LatLng(40.166813, -2.571247),
+            title: "Juan",
+            label: "T11",
             icon: marker_icon_FF0000,
             map: map
         });
@@ -49,9 +57,33 @@
         });
 
         new google.maps.Marker({
+            position: new google.maps.LatLng(40.166987, -2.640314),
+            title: "Juan",
+            label: "T1",
+            icon: marker_icon_FF0000,
+            map: map
+        });
+
+        new google.maps.Marker({
+            position: new google.maps.LatLng(40.031162, -2.680993),
+            title: "Juan",
+            label: "T20",
+            icon: marker_icon_FF0000,
+            map: map
+        });
+
+        new google.maps.Marker({
             position: new google.maps.LatLng(40.219973, -2.860116),
             title: "Juan",
             label: "T12",
+            icon: marker_icon_FF0000,
+            map: map
+        });
+
+        new google.maps.Marker({
+            position: new google.maps.LatLng(40.185551, -2.917858),
+            title: "Juan",
+            label: "T2",
             icon: marker_icon_FF0000,
             map: map
         });
@@ -106,9 +138,13 @@
             path: [
                 new google.maps.LatLng(40.164474, -2.587292),
                 new google.maps.LatLng(40.166813, -2.571247),
+                new google.maps.LatLng(40.166813, -2.571247),
                 new google.maps.LatLng(40.166987, -2.640314),
                 new google.maps.LatLng(40.166987, -2.640314),
+                new google.maps.LatLng(40.166987, -2.640314),
+                new google.maps.LatLng(40.031162, -2.680993),
                 new google.maps.LatLng(40.219973, -2.860116),
+                new google.maps.LatLng(40.185551, -2.917858),
                 new google.maps.LatLng(40.164474, -2.587292),
             ]
         });
