@@ -108,7 +108,7 @@ def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities
         else:
             texte.write("{};{};\n".format(line[0],line[1]))
     
-    print(resultats) 
+    #print(resultats) 
 
     
 def sous_taches(tasks):
@@ -146,3 +146,30 @@ def sous_taches(tasks):
                     break
 
     return new_tasks
+
+
+def score(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance):
+    "Give some statistics of the solution (time of tasks, of travel, of unavailability, ...)"
+    number_of_employees, number_of_tasks = len(employees)-1, len(new_tasks)-1
+    tasks_time, travel_time, unavailability_time, inactivity_time = 0, 0, 0, 0
+    print('================================================================================================')
+    for k in range(1,number_of_employees+1):
+        tasks_time_k, travel_time_k, unavailability_time_k = 0, 0, 0
+        for i in range(1,number_of_tasks+1):
+            for j in range(1,number_of_tasks+1):
+                if DELTA[(i,j,k)]==1:
+                    if type(new_tasks[i].TaskId) != int:
+                        tasks_time_k += new_tasks[i].TaskDuration
+                    travel_time_k += trajet(new_tasks[i],new_tasks[j])
+        for l in range(len(employees[k].Unavailabilities)):
+            unavailability_time_k += employees[k].Unavailabilities[l].End - employees[k].Unavailabilities[l].Start
+        inactivity_time_k = employees[k].WorkingEndTime - employees[k].WorkingStartTime - tasks_time_k - travel_time_k - unavailability_time_k
+        print(f"{employees[k].EmployeeName} fait {round(tasks_time_k/60,1)} h de tâches, {round(travel_time_k/60,1)} h de trajet, {round(unavailability_time_k/60,1)} h d'indisponibilité et {round(inactivity_time_k/60,1)} h d'inactivité")
+        tasks_time += tasks_time_k
+        travel_time += travel_time_k
+        unavailability_time += unavailability_time_k
+        inactivity_time += inactivity_time_k
+    print("Soit au total :")
+    print(f" - {round(tasks_time/60,1)} h de tâches \n - {round(travel_time/60,1)} h de trajet \n - {round(unavailability_time/60,1)} h d'indisponibilité \n - {round(inactivity_time/60,1)} h d'inactivité")
+    print("sur {} h".format(round((tasks_time+travel_time+unavailability_time+inactivity_time)/60)))
+    print('================================================================================================')

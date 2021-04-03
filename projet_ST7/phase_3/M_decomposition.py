@@ -24,7 +24,7 @@ from time import time
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Spain"
+country = "Bordeaux"
 phase = '3'
 time_limit = 10     # max resolution time per employee (in seconds)
 
@@ -198,3 +198,4 @@ for k in range(1,number_of_employees+1):
 
 draw(employees,tasks,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
 fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
+score(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
