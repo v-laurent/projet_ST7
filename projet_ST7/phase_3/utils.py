@@ -8,8 +8,8 @@ from classes import *
 R = 6371000
 ## Phase du projet ##
 #phase = "1" 
-phase = "2"
-#phase = "3"
+#phase = "2"
+phase = "3"
 ## Instance jeu de données ##
 #instance = "1"
 instance = "2"
@@ -36,7 +36,7 @@ colors=['black','red','green','blue','yellow','cyan','orange','slategray','lemon
 color_code=dict()
 color_code={i:color for (i,color) in enumerate(colors)}
 
-def draw(employees,latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=phase):
+def draw(employees,tasks,latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=phase):
     directory = os.path.dirname(os.path.realpath(__file__))
     directory = directory + os.sep+"gmplot_fichiers_phase" +phase
     if not os.path.exists(directory):
@@ -45,10 +45,15 @@ def draw(employees,latitude_list_list,longitude_list_list,task_numbers,name,DELT
     mean_latitude=sum(latitude_list_list[1])/len(latitude_list_list[1])
     mean_longitude=sum(longitude_list_list[1])/len(longitude_list_list[1])
     gmap1 = gmplot.GoogleMapPlotter(mean_latitude, mean_longitude,  10)
+    
+    for i in range(1,len(tasks)):
+        task = tasks[i]
+        gmap1.marker(task.Latitude,task.Longitude,'red',label="{}".format(task.TaskId))
+    
     for employee in range(1,len(latitude_list_list)):
         gmap1.plot(latitude_list_list[employee],longitude_list_list[employee], color_code[employee-1],edge_width=2.5)
         for point in range(0,len(latitude_list_list[employee])):
-            gmap1.marker(latitude_list_list[employee][point],longitude_list_list[employee][point],label="{}".format(task_numbers[employee][point])
+            gmap1.marker(latitude_list_list[employee][point],longitude_list_list[employee][point],'lightgreen',label="{}".format(task_numbers[employee][point])
             ,title=employees[employee].EmployeeName)
     gmap1.draw( "{}".format(name))
     
