@@ -7,7 +7,6 @@ def best_solution(employees,tasks,number_of_fake_tasks,threshold):
     number_of_unavailabilities=0
     for employee in employees[1:]:
         number_of_unavailabilities += len(employee.Unavailabilities)
-
     tasks = [0]+[t for t in tasks if t != 0]    
     
     number_of_employees,  number_of_tasks = len(employees)-1, len(tasks)-1
@@ -47,11 +46,27 @@ def best_solution(employees,tasks,number_of_fake_tasks,threshold):
     #temporal constraints
     oo = 1440
     lunch_duration=60
-    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] -(1-DELTA[(i,j,k)])*oo +lunch_duration*X[(i,j,k)], name=f'temporal_constr_{k}_{i}_{j}')
-                            for i in range(1,number_of_tasks+1)
+    liste_without_Sam=list(range(1,number_of_tasks+1))
+    liste_without_Sam.remove(2)
+    temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] 
+        -(1-DELTA[(i,j,k)])*oo +lunch_duration*X[(i,j,k)], 
+        name=f'temporal_constr_{k}_{i}_{j}')
+                            for i in liste_without_Sam
                             for j in range(number_of_employees+1,number_of_tasks+1)  #i in A*
                             for k in range(1,number_of_employees+1) }
-
+#     temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] 
+#         -(1-DELTA[(i,j,k)])*oo +lunch_duration*X[(i,j,k)], 
+#         name=f'temporal_constr_{k}_{i}_{j}')
+#                             for i in range(3,number_of_tasks+1)
+#                             for j in range(number_of_employees+1,number_of_tasks+1)  #i in A*
+#                             for k in [2] }
+#     temporal_constr = { (k,i,j) : m.addConstr( T[(k,j)] >= T[(k,i)] + tasks[i].TaskDuration +(3.6/(50*60)) * d[(i,j,k)] 
+#         -(1-DELTA[(i,j,k)])*oo +lunch_duration*X[(i,j,k)], 
+#         name=f'temporal_constr_{k}_{i}_{j}')
+#                             for i in [2]
+#                             for j in range(number_of_employees+2,number_of_tasks+1)  #i in A*
+#                             for k in [2] }
+                        
     X_1_constr = { (i,j,k) : m.addConstr( X[(i,j,k)] >= DELTA[(i,j,k)] + P[(k,i)] - 1, name=f'X_1_constr_{i}_{j}_{k}')
                             for i in range(1,number_of_tasks+1)
                             for j in range(number_of_employees+1,number_of_tasks+1)  #i in A*
@@ -91,8 +106,9 @@ def best_solution(employees,tasks,number_of_fake_tasks,threshold):
 
     #employee_available
     availability_employee_lb_constr = { (i,k) : m.addConstr( employees[k].WorkingStartTime <= T[(k,i)], name=f'avaibility_employe_lb_constr_{i}_{k}' )
-                                for i in range(1, number_of_tasks+1)
-                                for k in range(1, number_of_employees+1) }
+                                for i in range(3, number_of_tasks+1)
+                                for k in [1,3] }
+
 
     avaibility_employee_ub_constr = { (i,k) : m.addConstr( T[(k,i)] <= employees[k].WorkingEndTime - tasks[i].TaskDuration - 3.6/(50*60)*d[(i,k,k)]*DELTA[(i,k,k)], name=f'avaibility_employe_ub_constr_{i}_{k}' )
                                 for i in range(number_of_employees+number_of_unavailabilities+1,number_of_tasks+1)
