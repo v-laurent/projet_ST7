@@ -14,7 +14,7 @@ from gurobipy import *
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Austria"
+country = "Bordeaux"
 employees, tasks = readingData(country)
 
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
@@ -35,7 +35,7 @@ for k in range(1,number_of_employees):
                             "",0,employees[k].Unavailabilities[unavailability].Start, employees[k].Unavailabilities[unavailability].End,
                             [],0,k))
  
-    #     employees_unavailability.append(0)
+    #     employees_unavailabil city.append(0)
 
 new_tasks = [0]+ depots + employees_unavailability + sous_taches(tasks)
 number_of_tasks=len(new_tasks)-1
