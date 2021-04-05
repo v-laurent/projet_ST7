@@ -50,3 +50,4 @@ def ratio_tache_trajet(country):
     
 ratio_tache_trajet(country)
             
+
