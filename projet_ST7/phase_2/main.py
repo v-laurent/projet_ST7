@@ -27,11 +27,13 @@ depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440
 
 employees_unavailability=[]
 for k in range(1,number_of_employees):
-    if len(employees[k].Unavailabilities)!=0: #if the employee has unavailabilities
-        employees_unavailability.append(TTask(-1,employees[k].Unavailabilities[0].Latitude, employees[k].Unavailabilities[0].Longitude, 
-                        employees[k].Unavailabilities[0].End-employees[k].Unavailabilities[0].Start,
-                        "",0,employees[k].Unavailabilities[0].Start, employees[k].Unavailabilities[0].End,
-                        [],0,k))
+    number_of_unavailabilities_k=len(employees[k].Unavailabilities)
+    if number_of_unavailabilities_k!=0: #if the employee has unavailabilities
+        for unavailability in range(number_of_unavailabilities_k):
+            employees_unavailability.append(TTask(-1,employees[k].Unavailabilities[unavailability].Latitude, employees[k].Unavailabilities[unavailability].Longitude, 
+                            employees[k].Unavailabilities[unavailability].End-employees[k].Unavailabilities[unavailability].Start,
+                            "",0,employees[k].Unavailabilities[unavailability].Start, employees[k].Unavailabilities[unavailability].End,
+                            [],0,k))
  
     #     employees_unavailability.append(0)
 
