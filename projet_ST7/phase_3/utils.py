@@ -3,6 +3,7 @@ import gmplot
 from math import sin, cos,sqrt,atan2,radians,acos,asin
 import os
 from classes import *
+from  matplotlib.colors import cnames
 
 #rayon de la terre en m
 R = 6371000
@@ -32,7 +33,8 @@ def dateToMinute(date):
     return 12*60*pm + 60*h + m
 
 
-colors=['black','red','green','blue','yellow','cyan','orange','slategray','lemonchiffon']
+colors = [key for key,c in cnames.items()]
+#colors=['black','red','green','blue','yellow','cyan','orange','slategray','lemonchiffon']
 color_code=dict()
 color_code={i:color for (i,color) in enumerate(colors)}
 

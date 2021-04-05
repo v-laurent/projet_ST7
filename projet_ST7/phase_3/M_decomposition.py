@@ -24,11 +24,12 @@ from time import time
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Bordeaux"
+country = "Ukraine"
+instance = '3'
 phase = '3'
 time_limit = 10     # max resolution time per employee (in seconds)
 
-employees, tasks = readingData(country)
+employees, tasks = readingData(country, instance)
 
 number_of_employees = len(employees)-1
 nb_unavailabilities = 0

@@ -4,10 +4,10 @@ from utils import *
 from classes import *
 
 
-def readingData(country):
+def readingData(country,phase='2'):
 
     current_dir = dirname(__file__)
-    file_path = current_dir + "/InstancesV2/Instance" + country + "V2.xlsx"
+    file_path = current_dir + "/InstancesV"+phase+"/Instance" + country + "V"+phase+".xlsx"
     xls = pd.ExcelFile(file_path)
 
     # employees
