@@ -1,13 +1,15 @@
 import matplotlib.pyplot as plt
 from  matplotlib.colors import cnames
-from classes import *
-from utils import *
-from reading_data import *
-from model import *
 import numpy as np
 from sklearn.cluster import KMeans
 import math
 import random
+
+from classes import *
+from utils import *
+from reading_data import *
+from model import *
+
 from gurobipy import *
 
 """ idées
@@ -33,7 +35,7 @@ def subdivise_problem(country, plotting_solution = False):
                                     for k,employee in enumerate(employees) if k != 0
                                     for unavailability in employee.Unavailabilities ]
 
-    tasks = depots + employees_unavailabilities + real_tasks[1:]
+    tasks = depots + employees_unavailabilities + sous_taches(real_tasks)
 
     level_max = max(tasks, key = lambda task:task.Level).Level
 
@@ -140,13 +142,64 @@ def subdivise_problem(country, plotting_solution = False):
         plt.axis("equal")
         plt.show()
 
+    #we must have the unavaibilities of an employee in his cluster
+    for i,task in enumerate(tasks):
+        if task.id_employee != 0:
+            labels[best_cluster][i] = labels[best_cluster][task.id_employee-1]    
+
+
     #return the results    
     new_employees = [ [] for cluster in range(best_cluster) ]
     new_tasks = [ [] for cluster in range(best_cluster) ]
     for cluster in range(best_cluster):
-        new_tasks[cluster] = [ task for i,task in enumerate(tasks) if labels[best_cluster][i] == cluster]
-        new_employees[cluster] = [employee for k,employee in enumerate(employees[1:]) if labels[best_cluster][k] == cluster]
+        new_tasks[cluster] = [None] + [ task for i,task in enumerate(tasks) if labels[best_cluster][i] == cluster]
+        new_employees[cluster] = [None] + [employee for k,employee in enumerate(employees[1:]) if labels[best_cluster][k] == cluster]
 
     return new_employees, new_tasks
 
-subdivise_problem("Austria", True)
+employees, tasks = subdivise_problem("Bordeaux", True)
+
+"""
+#test
+
+number_of_clusters = len(employees)
+number_of_fake_tasks = [ len(employees[cluster]) + sum([ len(e.Unavailabilities) for e in employees[cluster][1:] ]) for cluster in range(number_of_clusters) ]
+
+cluster = 0
+DELTA, T, P, _, _ = best_solution(employees[cluster], tasks[cluster], number_of_fake_tasks[cluster],0)
+number_of_employees = len(employees[cluster])-1
+number_of_tasks = len(tasks[cluster])-1
+
+latitudes=[[] for employee in range(number_of_employees+1)]
+longitudes=[[] for employee in range(number_of_employees+1)]
+task_numbers=[[] for employee in range(number_of_employees+1)]
+
+for k in range(1,number_of_employees+1):
+    T_f = []
+    for i in range(1,number_of_tasks+1):
+        T_f.append(T[(k,i)]) #storing the start times of tasks
+    T_indices = np.argsort(T_f)+1
+    for i in T_indices:
+        for j in T_indices:
+            if int(DELTA[(i,j,k)])==1:
+                if i not in range(1,number_of_employees+1) and j not in range(1,number_of_employees+1):
+                    #print("distance{}-{}".format(i,j),int(distance(tasks[i],tasks[j])))
+                        latitudes[k].append(new_tasks[i].Latitude)
+                        longitudes[k].append(new_tasks[i].Longitude)
+                        task_numbers[k].append(new_tasks[i].TaskId)
+                elif i in range(1,number_of_employees+1) and j not in range(1,number_of_employees+1):
+                    #print("distance{}-{}".format(i,j),int(distance(employees[k],tasks[j])),"distance au depot")
+                    latitudes[k].append(employees[k].Latitude)
+                    longitudes[k].append(employees[k].Longitude)
+                    task_numbers[k].append("D")
+                elif j in range(1,number_of_employees+1) and i not in range(1,number_of_employees+1):
+                    #print("distance{}-{}".format(i,j),int(distance(tasks[i],employees[k])),"distance au depot")
+                    latitudes[k].append(new_tasks[i].Latitude)
+                    longitudes[k].append(new_tasks[i].Longitude)
+                    task_numbers[k].append(new_tasks[i].TaskId)
+    latitudes[k].append(employees[k].Latitude)
+    longitudes[k].append(employees[k].Longitude)
+    task_numbers[k].append(0)
+
+draw(employees,latitudes,longitudes,task_numbers,'test.html',DELTA)
+"""
