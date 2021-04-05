@@ -14,7 +14,7 @@ from gurobipy import *
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Australia"
+country = "Austria"
 employees, tasks = readingData(country)
 
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
