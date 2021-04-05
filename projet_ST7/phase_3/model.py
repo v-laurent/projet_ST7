@@ -3,7 +3,7 @@ from utils import *
 from gurobipy import *
 import matplotlib.pyplot as plt
 
-def best_solution(employees,tasks,number_of_fake_tasks,threshold):
+def best_solution(employees,tasks,number_of_fake_tasks,threshold, TimeLimit=20*60):
     number_of_unavailabilities=0
     for employee in employees[1:]:
         number_of_unavailabilities += len(employee.Unavailabilities)
@@ -14,7 +14,7 @@ def best_solution(employees,tasks,number_of_fake_tasks,threshold):
 
     #model
     m = Model('PL_phase_2')
-    m.setParam('TimeLimit', 20*60)
+    m.setParam('TimeLimit', TimeLimit)
     #decision variables
     DELTA = { (i,j,k) : m.addVar(vtype=GRB.BINARY, name=f'DELTA_{i}_{j}_{k}') 
             for i in range(1, number_of_tasks+1)

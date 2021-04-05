@@ -6,9 +6,10 @@ from reading_data import *
 import matplotlib.pyplot as plt
 
 #################################################
-country = 'Bordeaux'
-dossier_txt = 'fichiers_txt_phase2'
-version = 'V2ByV3'
+country = 'Austria'
+phase = '3'
+dossier_txt = 'fichiers_txt_phase'+phase
+version = 'V2ByV'+phase
 #################################################
 # chosen accuracy for the warning (in minutes)
 epsilon = 1
@@ -241,7 +242,7 @@ def gantt_diagram(country):
         gnt.broken_barh(unavailabilities_times[i],(10*(i+1)-3,0.5),facecolors=('tab:blue'))
     
     plt.vlines([12*60, 14*60], 0, 10*(number_of_employees+1), 'red', 'dashed', alpha=0.5)
-    plt.savefig('gantt_phase2/{}.png'.format(country))
+    plt.savefig('gantt_phase3/{}.png'.format(country))
 
     ## 2nd plot
     fig2,blab=plt.subplots()
@@ -274,7 +275,7 @@ def gantt_diagram(country):
                 start_time = unavailability.End
             blab.broken_barh([(start_time,tasks[i].ClosingTime-start_time)],(10*(i+1)-1,2),facecolors=(f'tab:{color}'))
 
-    plt.savefig('gantt_phase2/{}_tasks.png'.format(country))
+    plt.savefig('gantt_phase3/{}_tasks.png'.format(country))
 
 
 

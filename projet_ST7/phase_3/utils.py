@@ -8,8 +8,8 @@ from classes import *
 R = 6371000
 ## Phase du projet ##
 #phase = "1" 
-phase = "2"
-#phase = "3"
+#phase = "2"
+phase = "3"
 ## Instance jeu de données ##
 #instance = "1"
 instance = "2"
@@ -36,7 +36,7 @@ colors=['black','red','green','blue','yellow','cyan','orange','slategray','lemon
 color_code=dict()
 color_code={i:color for (i,color) in enumerate(colors)}
 
-def draw(employees,latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=phase):
+def draw(employees,tasks,latitude_list_list,longitude_list_list,task_numbers,name,DELTA,phase=phase):
     directory = os.path.dirname(os.path.realpath(__file__))
     directory = directory + os.sep+"gmplot_fichiers_phase" +phase
     if not os.path.exists(directory):
@@ -45,10 +45,15 @@ def draw(employees,latitude_list_list,longitude_list_list,task_numbers,name,DELT
     mean_latitude=sum(latitude_list_list[1])/len(latitude_list_list[1])
     mean_longitude=sum(longitude_list_list[1])/len(longitude_list_list[1])
     gmap1 = gmplot.GoogleMapPlotter(mean_latitude, mean_longitude,  10)
+    
+    for i in range(1,len(tasks)):
+        task = tasks[i]
+        gmap1.marker(task.Latitude,task.Longitude,'red',label="{}".format(task.TaskId))
+    
     for employee in range(1,len(latitude_list_list)):
         gmap1.plot(latitude_list_list[employee],longitude_list_list[employee], color_code[employee-1],edge_width=2.5)
         for point in range(0,len(latitude_list_list[employee])):
-            gmap1.marker(latitude_list_list[employee][point],longitude_list_list[employee][point],label="{}".format(task_numbers[employee][point])
+            gmap1.marker(latitude_list_list[employee][point],longitude_list_list[employee][point],'lightgreen',label="{}".format(task_numbers[employee][point])
             ,title=employees[employee].EmployeeName)
     gmap1.draw( "{}".format(name))
     
@@ -103,7 +108,7 @@ def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities
         else:
             texte.write("{};{};\n".format(line[0],line[1]))
     
-    print(resultats) 
+    #print(resultats) 
 
     
 def sous_taches(tasks):
@@ -141,3 +146,30 @@ def sous_taches(tasks):
                     break
 
     return new_tasks
+
+
+def score(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance):
+    "Give some statistics of the solution (time of tasks, of travel, of unavailability, ...)"
+    number_of_employees, number_of_tasks = len(employees)-1, len(new_tasks)-1
+    tasks_time, travel_time, unavailability_time, inactivity_time = 0, 0, 0, 0
+    print('================================================================================================')
+    for k in range(1,number_of_employees+1):
+        tasks_time_k, travel_time_k, unavailability_time_k = 0, 0, 0
+        for i in range(1,number_of_tasks+1):
+            for j in range(1,number_of_tasks+1):
+                if DELTA[(i,j,k)]==1:
+                    if type(new_tasks[i].TaskId) != int:
+                        tasks_time_k += new_tasks[i].TaskDuration
+                    travel_time_k += trajet(new_tasks[i],new_tasks[j])
+        for l in range(len(employees[k].Unavailabilities)):
+            unavailability_time_k += employees[k].Unavailabilities[l].End - employees[k].Unavailabilities[l].Start
+        inactivity_time_k = employees[k].WorkingEndTime - employees[k].WorkingStartTime - tasks_time_k - travel_time_k - unavailability_time_k
+        print(f"{employees[k].EmployeeName} fait {round(tasks_time_k/60,1)} h de tâches, {round(travel_time_k/60,1)} h de trajet, {round(unavailability_time_k/60,1)} h d'indisponibilité et {round(inactivity_time_k/60,1)} h d'inactivité")
+        tasks_time += tasks_time_k
+        travel_time += travel_time_k
+        unavailability_time += unavailability_time_k
+        inactivity_time += inactivity_time_k
+    print("Soit au total :")
+    print(f" - {round(tasks_time/60,1)} h de tâches \n - {round(travel_time/60,1)} h de trajet \n - {round(unavailability_time/60,1)} h d'indisponibilité \n - {round(inactivity_time/60,1)} h d'inactivité")
+    print("sur {} h".format(round((tasks_time+travel_time+unavailability_time+inactivity_time)/60)))
+    print('================================================================================================')
