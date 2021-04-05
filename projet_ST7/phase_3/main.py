@@ -14,7 +14,7 @@ from gurobipy import *
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Bordeaux"
+country = "Australia"
 employees, tasks = readingData(country)
 
 number_of_employees,  number_of_tasks = len(employees), len(tasks)
@@ -24,16 +24,15 @@ for employee in employees[1:]:
 
 depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",0,480,1440,[],0,k) for k in range(1,number_of_employees) ]
             
+#à changer !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 employees_unavailability=[]
 for k in range(1,number_of_employees):
-    number_of_unavailabilities_k=len(employees[k].Unavailabilities)
-    if number_of_unavailabilities_k!=0: #if the employee has unavailabilities
-        for unavailability in range(number_of_unavailabilities_k):
-            employees_unavailability.append(TTask(-1,employees[k].Unavailabilities[unavailability].Latitude, employees[k].Unavailabilities[unavailability].Longitude, 
-                            employees[k].Unavailabilities[unavailability].End-employees[k].Unavailabilities[unavailability].Start,
-                            "",0,employees[k].Unavailabilities[unavailability].Start, employees[k].Unavailabilities[unavailability].End,
-                            [],0,k))
+    if len(employees[k].Unavailabilities)!=0: #if the employee has unavailabilities
+        employees_unavailability.append(TTask(-1,employees[k].Unavailabilities[0].Latitude, employees[k].Unavailabilities[0].Longitude, 
+                        employees[k].Unavailabilities[0].End-employees[k].Unavailabilities[0].Start,
+                        "",0,employees[k].Unavailabilities[0].Start, employees[k].Unavailabilities[0].End,
+                        [],0,k))
  
     #     employees_unavailability.append(0)
 
@@ -43,7 +42,19 @@ number_of_employees=len(employees)-1
 number_of_fake_tasks = 1 + len(depots) + len(employees_unavailability)
 
 ##***************************** epsilon constraint  ##****************************
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,number_of_employees+nb_unavailabilities,0)
+'''
+<<<<<<< HEAD
+<<<<<<< HEAD
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,10)
+=======
+DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,12)
 
+>>>>>>> 5fc175c58e1a2bc94f6f81cdc8bd9f9d7143f406
+
+"""
+epsilon = 0.1
+=======
 """ To run the code with the first objective function """
 
 #DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_tasks,12)
@@ -55,6 +66,7 @@ DELTA, T, P, traveled_distance, nb_task_done = best_solution(employees, new_task
 """ To run the epsilon constraint method, and have the polt of the pareto front 
 
 epsilon = 0.1  #the step of the epsilon constraint 
+>>>>>>> b12d0d54500ce8ad9619c033362492b16d8c8296
 X, Y = [], []
 result = best_solution(employees,new_tasks,0)
 
@@ -77,8 +89,8 @@ plt.xlabel('Travel distance (km)')
 plt.ylabel('number of accomplished tasks')
 plt.legend()
 plt.show()
-
 """
+'''
 ##****************************   plot  ##************************
 
 latitudes=[[] for employee in range(number_of_employees+1)]
@@ -117,6 +129,5 @@ for k in range(1,number_of_employees+1):
     longitudes[k].append(employees[k].Longitude)
     task_numbers[k].append(0)
 
-draw(employees,tasks,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
+draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
 fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
-score(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
