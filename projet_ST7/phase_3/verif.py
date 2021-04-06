@@ -6,7 +6,7 @@ from reading_data import *
 import matplotlib.pyplot as plt
 
 #################################################
-country = 'Bordeaux'
+country = 'Austria'
 phase = '3'
 dossier_txt = 'fichiers_txt_phase'+phase
 version = 'V2ByV'+phase

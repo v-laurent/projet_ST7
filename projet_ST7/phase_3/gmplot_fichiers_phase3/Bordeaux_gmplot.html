@@ -17,8 +17,15 @@
         };
 
         new google.maps.Marker({
-            position: new google.maps.LatLng(44.556549, -0.319392),
-            label: "T1",
+            position: new google.maps.LatLng(44.936309, -0.830941),
+            label: "0",
+            icon: marker_icon_FF0000,
+            map: map
+        });
+
+        new google.maps.Marker({
+            position: new google.maps.LatLng(45.151218, -0.822093),
+            label: "-1",
             icon: marker_icon_FF0000,
             map: map
         });
@@ -86,6 +93,13 @@
             map: map
         });
 
+        new google.maps.Marker({
+            position: new google.maps.LatLng(44.556549, -0.319392),
+            label: "T1",
+            icon: marker_icon_FF0000,
+            map: map
+        });
+
         var marker_icon_90EE90 = {
             url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAiCAYAAACwaJKDAAAABmJLR0QA/wD/AP+gvaeTAAADFklEQVRIia2WXUhTYRjHf2djjj5AtgshXd3MRJAIidEHWRFB0MVA6MIrb7JAiCKioK7KoKCbKIKsoMIbRUZRal/U0rRFLbZszqVsWLatD5bOXM0dd/Z24ZZbbG5O/zcvPO/z/3Eenuc550gsrBpgO1ABqIAEEAAGAHcuk5Qjvgc4D5h0Bh3lNeWsKF1BdCpK0B1k0j8JYAdOA8/yQSXggiRJJ2vra6XdR3ZTsaECScpM83/wY71ixXnPKYQQF4FTgMgGlYBL2tXao403G6nZW5Orun9yP3bTdqiNWCR2GTiWAqvTco5qtJozzXebqdpZlRcIUFZZRuW2ShwWx5aEkpgE3qRDy4H75rNmTW19bUHAlHQGHSWrSvho/bgDuANMq5J3zfq1+pV1B+sWBUyprqkO/Tr9SqAZ5sYEwGxqMKHWqHM7F5Bao8bUYAIwp6BqoNq4zVgUMCXjViNANaBWARqgRGfQLQma9JcAGlWe3KKkAmRAnvgysSRQ0i8DcmqfPd5X3iVBk34PkEiV/8DeYUeRlaKAyqyCvcMO8ADmR+paOBCO9Lb2FgXtu95HOBCOANdgfqMiwLTP5ttn3GpEv05fMNBn89F+uJ2EkjgOWNOhAG+FIvSDXYObq3dVU7qmNC/QP+indX8r8h/5CtCSiv+/Qk8UWVk//HR4w6b9m9Cu1uYE/p74zVXzVSKhSCfQlH73/5wKoGnq25Sr/XA7QghyyXLCQjgQHgUOkPYuzQYFiAKNnueeuMPiyAoc7RvFec8JcJC5fmQo10a9B1q7WrqIx+KZpQhB97luAAvwMpt5oTU9Fw6Eo+8632UEvQNexh3jgrTGLAb6A2jrv9mfEbTdtsHc6LiKgQLcCAwFCLqDAMz8mmHo0RDArYVM+aAOYNTVM/dQHquH2dhslOQ6FgsF6BnpHQFgxDoC8IIsHV8s9MW4cxxFVvDavJDl56EYqD0eizNmH+Pn2E+A18sB/QaEXA9dCCEUYLAAT0GyGzYaBOArJLnQb1QoNBYC+Lyc0ImZXzMA08sJ/Z48g8sJ/Zo8PxWS/Be0rSXqOMvytgAAAABJRU5ErkJggg==",
             labelOrigin: new google.maps.Point(10, 11)
@@ -94,7 +108,7 @@
         new google.maps.Marker({
             position: new google.maps.LatLng(45.151218, -0.822093),
             title: "Valentin",
-            label: "D",
+            label: "0",
             icon: marker_icon_90EE90,
             map: map
         });
@@ -150,7 +164,7 @@
         new google.maps.Marker({
             position: new google.maps.LatLng(44.936309, -0.830941),
             title: "Ambre",
-            label: "D",
+            label: "0",
             icon: marker_icon_90EE90,
             map: map
         });
@@ -206,7 +220,7 @@
         new google.maps.Polyline({
             clickable: false,
             geodesic: true,
-            strokeColor: "#F0F8FF",
+            strokeColor: "#FF0000",
             strokeOpacity: 1.000000,
             strokeWeight: 2,
             map: map,
@@ -224,7 +238,7 @@
         new google.maps.Polyline({
             clickable: false,
             geodesic: true,
-            strokeColor: "#FAEBD7",
+            strokeColor: "#008000",
             strokeOpacity: 1.000000,
             strokeWeight: 2,
             map: map,

@@ -130,4 +130,4 @@ for k in range(1,number_of_employees+1):
     task_numbers[k].append(0)
 
 draw(employees,latitudes,longitudes,task_numbers,country+'_gmplot.html',DELTA)
-fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
+fichier_texte(DELTA,T,P,tasks,new_tasks,employees,country,phase=phase,instance=instance)

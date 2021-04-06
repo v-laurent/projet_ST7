@@ -33,7 +33,7 @@ def dateToMinute(date):
     return 12*60*pm + 60*h + m
 
 
-colors = [key for key,c in cnames.items()]
+colors = ['red','blue','violet','gray','magenta'] + [key for key,c in cnames.items()]
 #colors=['black','red','green','blue','yellow','cyan','orange','slategray','lemonchiffon']
 color_code=dict()
 color_code={i:color for (i,color) in enumerate(colors)}
@@ -62,7 +62,7 @@ def draw(employees,tasks,latitude_list_list,longitude_list_list,task_numbers,nam
 def trajet(depart,arrivee):
     return (3.6/(50*60))*distance(depart,arrivee)
 
-def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,number_of_unavailabilities,country,phase=phase,instance=instance):
+def fichier_texte(DELTA,T,P,tasks,new_tasks,employees,country,phase=phase,instance=instance):
     directory = os.path.dirname(os.path.realpath(__file__))
     directory = directory + os.sep + "fichiers_txt_phase" + phase
     if not os.path.exists(directory):
@@ -150,7 +150,7 @@ def sous_taches(tasks):
     return new_tasks
 
 
-def score(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance):
+def score(DELTA,T,P,tasks,new_tasks,employees,country,phase=phase,instance=instance):
     "Give some statistics of the solution (time of tasks, of travel, of unavailability, ...)"
     number_of_employees, number_of_tasks = len(employees)-1, len(new_tasks)-1
     tasks_time, travel_time, unavailability_time, inactivity_time = 0, 0, 0, 0

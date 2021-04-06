@@ -25,8 +25,8 @@ average_duration_task_done = 100
 show_levels = True
 
 
-def subdivise_problem(country, plotting_solution = False):
-    employees, real_tasks = readingData(country)
+def subdivise_problem(country, instance='2', plotting_solution = False):
+    employees, real_tasks = readingData(country,instance)
     number_of_employees = len(employees)-1
     depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",employees[k].Level,480,1440,[],0,k) for k in range(1,number_of_employees+1) ]
     employees_unavailabilities = [ TTask(-1,unavailability.Latitude, unavailability.Longitude, unavailability.End-unavailability.Start,"",0,unavailability.Start, unavailability.End,[],0,k)
@@ -149,4 +149,6 @@ def subdivise_problem(country, plotting_solution = False):
 
     return new_employees, new_tasks
 
-subdivise_problem("Austria", True)
+
+
+#subdivise_problem("Columbia", '3',True)
