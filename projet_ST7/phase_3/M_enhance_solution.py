@@ -14,7 +14,7 @@ import random
 Definition of some useful fonctions to enhance an existing solution
 """
 
-def fill(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance):
+def fill(DELTA,T,P,tasks,new_tasks,employees,country,phase=phase,instance=instance):
     number_of_tasks = len(new_tasks)-1
     number_of_employees = len(employees)-1
     # storing indices of tasks done, and in the right order
@@ -43,12 +43,12 @@ def fill(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=p
             for i in sorted_indices:
                 for j in sorted_indices:
                     if (tasks[t].TaskId != new_tasks[i].TaskId) and (tasks[t].TaskId != new_tasks[j].TaskId)
-                        if trajet(new_tasks[i],tasks[t]) + tasks[t] + trajet(tasks[t], new_tasks[j]):
+                        if trajet(new_tasks[i],tasks[t]) + tasks[t] + trajet(tasks[t], new_tasks[j]) < inactivity_time_k:
                             possible_tasks.append((t,i,j))
         
         # if the schedule is already full
         if len(possible_tasks)==0:
-            return (DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
+            return (DELTA,T,P,tasks,new_tasks,employees,country,phase=phase,instance=instance)
 
         # else, we try to add a task
         updated_DELTA, updated_T, updated_P = DELTA, T, P
@@ -71,4 +71,4 @@ def fill(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=p
 
 
 
-#fichier_texte(DELTA,T,P,tasks,new_tasks,employees,nb_unavailabilities,country,phase=phase,instance=instance)
+#fichier_texte(DELTA,T,P,tasks,new_tasks,employees,country,phase=phase,instance=instance)

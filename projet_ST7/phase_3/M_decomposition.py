@@ -28,9 +28,9 @@ from time import time
 country = "Ukraine"
 instance = '3'
 phase = '3'
-time_limit = 10     # maximum resolution time per employee (in second)
+time_limit = 60     # maximum resolution time per employee (in second)
 cluster = True      # use clustering or not
-employee_per_employee = True
+employee_per_employee = True    # using gurobi on each employee or on each cluster
 
 
 
@@ -110,10 +110,20 @@ def solving_all_clusters(employees_c, tasks, time_limit_per_employee=10):
                 nb_unavailabilities += len(employee.Unavailabilities)
 
             depots = [ TTask(0,employees_c[k].Latitude, employees_c[k].Longitude,0,"",0,480,1440,[],0,k) for k in range(1,number_of_employees_c+1) ]
-
+            employees_c_unavailability=[]
+            for k in range(1,number_of_employees_c+1):
+                for l in range(len(employees_c[k].Unavailabilities)): #if the employee has unavailabilities
+                    employees_c_unavailability.append(TTask(-1,employees_c[k].Unavailabilities[l].Latitude, employees_c[k].Unavailabilities[l].Longitude, 
+                                    employees_c[k].Unavailabilities[l].End-employees_c[k].Unavailabilities[l].Start,
+                                    "",0,employees_c[k].Unavailabilities[l].Start, employees_c[k].Unavailabilities[l].End,
+                                    [],0,k))
+    
+            new_tasks_c = [0]+ depots + employees_c_unavailability + sous_taches(tasks_c)
             number_of_fake_tasks_c = 1 + len(depots) + nb_unavailabilities
             
-            DELTA_c, T_c, P_c, obj_val_c, nb_task_done_c = best_solution(employee_c, tasks_c, number_of_fake_tasks_c, 0, TimeLimit=time_limit_per_employee)
+            initial_time = time()
+            DELTA_c, T_c, P_c, obj_val_c, nb_tasks_done_c = best_solution(employees_c, new_tasks_c, number_of_fake_tasks_c, 0, TimeLimit=time_limit_per_employee*number_of_employees_c)
+            resolution_time_c = time() - initial_time
         ############ END #############
 
 
