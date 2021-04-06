@@ -21,13 +21,13 @@ gérer les indisponibilités qui sont dasn plusieurs clusters : pas done du tout
 
 #parameters
 d_max_between_clusters = 50E3
-lambda_1 = 0.7
-lambda_2 = 0.3
+lambda_1 = 0.4
+lambda_2 = 0.6
 average_duration_task_done = 100
 show_levels = True
 
 
-def subdivise_problem(country, plotting_solution = False):
+def subdivise_problem(country, reduce_unbalancing = True, plotting_solution = False):
     employees, real_tasks = readingData(country)
     number_of_employees = len(employees)-1
     depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",employees[k].Level,480,1440,[],0,k) for k in range(1,number_of_employees+1) ]
@@ -35,7 +35,7 @@ def subdivise_problem(country, plotting_solution = False):
                                     for k,employee in enumerate(employees) if k != 0
                                     for unavailability in employee.Unavailabilities ]
 
-    tasks = depots + employees_unavailabilities + sous_taches(real_tasks)
+    tasks = depots + employees_unavailabilities + real_tasks[1:]
 
     level_max = max(tasks, key = lambda task:task.Level).Level
 
@@ -45,7 +45,7 @@ def subdivise_problem(country, plotting_solution = False):
     labels = dict()
     score = dict()
 
-    for nb_clusters in range( math.ceil(number_of_employees / 2), number_of_employees * 2 ):
+    for nb_clusters in range( max(1,number_of_employees // 2), number_of_employees * 2 ):
         model = KMeans(nb_clusters, n_init=10).fit(data_set)
 
         #post treatment
@@ -112,16 +112,45 @@ def subdivise_problem(country, plotting_solution = False):
 
         for e in range(1,number_of_employees+1):
             labels[nb_clusters][e-1] = np.argmax( np.array( [DELTA[(e,c)].x for c in useful_clusters] )  ) 
+    
+        #reduce unbalancing
+        if reduce_unbalancing:
+            balancing = {c : sum([ DELTA[(e,c)].x * employees[e].Max_working_duration / average_duration_task_done  
+                                        for e in range(1, number_of_employees+1)]) - (labels[nb_clusters] == c).sum() 
+                            for c in useful_clusters}  #< 0 : cluster c can provide tasks to others clusters
+            mean_balancing = np.mean(np.array([balance for c,balance in balancing.items() ]))
+            balancing = {c : balancing[c] - mean_balancing for c in useful_clusters}  
 
-        average_nb_employee_per_cluster = np.mean(np.array([ (labels[nb_clusters][:number_of_employees+1] == c).sum() - 1 for c in useful_clusters ]))
+            #print(labels)
+            for c in useful_clusters:
+                if balancing[c] > 0:        
+                    for i,task in enumerate(tasks):
+                        if task.id_employee == 0 and labels[nb_clusters][i] in useful_clusters and balancing[ labels[nb_clusters][i] ] < 0:
+                            task_cluster = labels[nb_clusters][i]
+                            d_c = min([np.Inf] + [ np.linalg.norm(depots[k].coord - task.coord,axis=0) 
+                                            for k,employee in enumerate(employees[1:]) if labels[nb_clusters][k] == c ])
+                            d_task_cluster = min([np.Inf] + [ np.linalg.norm(depots[k].coord - task.coord,axis=0) 
+                                                for k,employee in enumerate(employees[1:]) if labels[nb_clusters][k] == task_cluster ])
+                            if d_c < d_task_cluster and d_c < d_max_between_clusters//2:
+                                labels[nb_clusters][i] = c
+                                balancing[c] -= 1
+                                balancing[task_cluster] += 1
+            
+
         balancing = {c : abs( sum([ DELTA[(e,c)].x * employees[e].Max_working_duration / average_duration_task_done  
                                     for e in range(1, number_of_employees+1)]) - (labels[nb_clusters] == c).sum() )
-                        for c in useful_clusters}
-
+                        for c in useful_clusters }
+        average_nb_employee_per_cluster = np.mean(np.array([ (labels[nb_clusters][:number_of_employees+1] == c).sum() - 1 for c in useful_clusters ]))
         score[nb_clusters] = 0.3 * average_nb_employee_per_cluster + 0.7*sum([ balancing[c] for c in useful_clusters] )
         
     #best cluster
     best_cluster = min(score, key=score.get)
+
+    #we must have the unavaibilities of an employee in his cluster
+    for i,task in enumerate(tasks):
+        if task.id_employee != 0:
+            labels[best_cluster][i] = labels[best_cluster][task.id_employee-1] 
+            
 
     #plot
     if plotting_solution:
@@ -131,7 +160,7 @@ def subdivise_problem(country, plotting_solution = False):
             if i >= number_of_employees + len(employees_unavailabilities):
                 ax.scatter(task.X,task.Y,color = colors[labels[best_cluster][i] ])  
                 if show_levels:
-                    ax.annotate(task.Level, (task.X, task.Y))     
+                    ax.annotate(labels[best_cluster][i], (task.X, task.Y))     
         for i,task in enumerate(employees_unavailabilities):
                 ax.scatter(task.X,task.Y,marker = 'D',color = colors[labels[best_cluster][i + number_of_employees] ]) 
         for i,depot in enumerate(depots):
@@ -140,13 +169,7 @@ def subdivise_problem(country, plotting_solution = False):
                 ax.annotate(employees[depot.id_employee].EmployeeName, (depot.X, depot.Y))  
 
         plt.axis("equal")
-        plt.show()
-
-    #we must have the unavaibilities of an employee in his cluster
-    for i,task in enumerate(tasks):
-        if task.id_employee != 0:
-            labels[best_cluster][i] = labels[best_cluster][task.id_employee-1]    
-
+        plt.show()   
 
     #return the results    
     new_employees = [ [] for cluster in range(best_cluster) ]
@@ -157,49 +180,4 @@ def subdivise_problem(country, plotting_solution = False):
 
     return new_employees, new_tasks
 
-employees, tasks = subdivise_problem("Bordeaux", True)
-
-"""
-#test
-
-number_of_clusters = len(employees)
-number_of_fake_tasks = [ len(employees[cluster]) + sum([ len(e.Unavailabilities) for e in employees[cluster][1:] ]) for cluster in range(number_of_clusters) ]
-
-cluster = 0
-DELTA, T, P, _, _ = best_solution(employees[cluster], tasks[cluster], number_of_fake_tasks[cluster],0)
-number_of_employees = len(employees[cluster])-1
-number_of_tasks = len(tasks[cluster])-1
-
-latitudes=[[] for employee in range(number_of_employees+1)]
-longitudes=[[] for employee in range(number_of_employees+1)]
-task_numbers=[[] for employee in range(number_of_employees+1)]
-
-for k in range(1,number_of_employees+1):
-    T_f = []
-    for i in range(1,number_of_tasks+1):
-        T_f.append(T[(k,i)]) #storing the start times of tasks
-    T_indices = np.argsort(T_f)+1
-    for i in T_indices:
-        for j in T_indices:
-            if int(DELTA[(i,j,k)])==1:
-                if i not in range(1,number_of_employees+1) and j not in range(1,number_of_employees+1):
-                    #print("distance{}-{}".format(i,j),int(distance(tasks[i],tasks[j])))
-                        latitudes[k].append(new_tasks[i].Latitude)
-                        longitudes[k].append(new_tasks[i].Longitude)
-                        task_numbers[k].append(new_tasks[i].TaskId)
-                elif i in range(1,number_of_employees+1) and j not in range(1,number_of_employees+1):
-                    #print("distance{}-{}".format(i,j),int(distance(employees[k],tasks[j])),"distance au depot")
-                    latitudes[k].append(employees[k].Latitude)
-                    longitudes[k].append(employees[k].Longitude)
-                    task_numbers[k].append("D")
-                elif j in range(1,number_of_employees+1) and i not in range(1,number_of_employees+1):
-                    #print("distance{}-{}".format(i,j),int(distance(tasks[i],employees[k])),"distance au depot")
-                    latitudes[k].append(new_tasks[i].Latitude)
-                    longitudes[k].append(new_tasks[i].Longitude)
-                    task_numbers[k].append(new_tasks[i].TaskId)
-    latitudes[k].append(employees[k].Latitude)
-    longitudes[k].append(employees[k].Longitude)
-    task_numbers[k].append(0)
-
-draw(employees,latitudes,longitudes,task_numbers,'test.html',DELTA)
-"""
+employees, tasks = subdivise_problem("Austria", reduce_unbalancing=True, plotting_solution = True)
