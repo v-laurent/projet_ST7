@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 #confusion phase-instance à corrigier au cas par cas..
 country = 'Ukraine'
 phase = '3'
-instance = '2'
+instance = '3'
 version = f'V{instance}byV{phase}'
 def solution_analysis(country):
     directory = os.path.dirname(os.path.realpath(__file__))
@@ -17,7 +17,7 @@ def solution_analysis(country):
     if not os.path.exists(directory):
         os.makedirs(directory)
     os.chdir(directory)
-    
+
     titre = "AnalysisSolution"+country+"V"+instance+"ByV"+phase
     texte = open(f'{titre}.csv','w')
 
@@ -32,7 +32,7 @@ def solution_analysis(country):
 
     work_time_per_employee = [0 for i in range(number_of_employees)]
     travel_time_per_employee = [0 for i in range(number_of_employees)]
-    table = [['employeeName', 'timeWorking', 'timeTravelling', 'ratio', 'numberOfTasks']]
+    table = [['employeeName', 'timeWorking', 'timeTravelling', 'timeAvailable', 'ratioWorkTravel', 'ratioWorkAvai', 'numberOfTasks']]
 
     for k in range(number_of_employees):
         employee_name = employees[k].EmployeeName
@@ -53,12 +53,18 @@ def solution_analysis(country):
         travel_time_per_employee[k] += trajet(tasks[task_number], employees[k]) 
         
         if travel_time_per_employee[k] == 0:
-            ratio = 0
+            ratio_trav = 0
         else :
-            ratio = work_time_per_employee[k]/travel_time_per_employee[k]
-        table.append([employee_name, work_time_per_employee[k], travel_time_per_employee[k], ratio, len(tasks_id)])
+            ratio_trav = work_time_per_employee[k]/travel_time_per_employee[k]
+
+        avai_time = employees[k].WorkingEndTime - employees[k].WorkingStartTime - 60 #lunchtime
+        number_of_unavailabilities = len(employees[k].Unavailabilities)
+        for i in range(number_of_unavailabilities):
+            avai_time -= employees[k].Unavailabilities[i].End - employees[k].Unavailabilities[i].Start
+        ratio_avai = travel_time_per_employee[k]/avai_time
+        table.append([employee_name, work_time_per_employee[k], travel_time_per_employee[k],avai_time, ratio_trav, ratio_avai, len(tasks_id)])
     for line in table:
-        texte.write("{};{};{};{};{};\n".format(line[0],line[1],line[2],line[3],line[4]))
+        texte.write("{};{};{};{};{};{};{};\n".format(line[0],line[1],line[2],line[3],line[4],line[5],line[6]))
 
           
 solution_analysis(country)
