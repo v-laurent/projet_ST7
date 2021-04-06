@@ -182,4 +182,4 @@ def subdivise_problem(country, instance='2',reduce_unbalancing = True, plotting_
 
 
 
-#subdivise_problem("Columbia", '3',reduce_unbalancing=True,True)
+#subdivise_problem("Ukraine", '3',reduce_unbalancing=True, plotting_solution=True)
