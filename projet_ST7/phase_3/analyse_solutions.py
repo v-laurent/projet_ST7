@@ -6,22 +6,33 @@ from reading_data import *
 import matplotlib.pyplot as plt
 
 #################################################
-country = 'Bordeaux'
-dossier_txt = 'fichiers_txt_phase2'
-version = 'V2ByV2'
+#confusion phase-instance à corrigier au cas par cas..
+country = 'Ukraine'
+phase = '3'
+instance = '2'
+version = f'V{instance}byV{phase}'
+def solution_analysis(country):
+    directory = os.path.dirname(os.path.realpath(__file__))
+    directory = directory + os.sep + "fichiers_txt_phase" + phase
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    os.chdir(directory)
+    
+    titre = "AnalysisSolution"+country+"V"+instance+"ByV"+phase
+    texte = open(f'{titre}.csv','w')
 
-def ratio_tache_trajet(country):
     employees,tasks = readingData(country)          # depot is not a task
     employees = employees[1:]
     tasks = tasks[1:]
     number_of_employees = len(employees)
     number_of_tasks = len(tasks) 
 
-    decision = pd.read_csv(f"{dossier_txt}/Solution{country}{version}.txt", sep=';', nrows=number_of_tasks)
+    decision = pd.read_csv(f"{directory}/Solution{country}{version}.txt", sep=';', nrows=number_of_tasks)
     decision = decision[['taskId','performed','employeeName','startTime']]
 
     work_time_per_employee = [0 for i in range(number_of_employees)]
     travel_time_per_employee = [0 for i in range(number_of_employees)]
+    table = [['employeeName', 'timeWorking', 'timeTravelling', 'ratio', 'numberOfTasks']]
 
     for k in range(number_of_employees):
         employee_name = employees[k].EmployeeName
@@ -45,9 +56,11 @@ def ratio_tache_trajet(country):
             ratio = 0
         else :
             ratio = work_time_per_employee[k]/travel_time_per_employee[k]
-        print("le ratio temps tâches/temps trajet pour {} est de ".format(employee_name) + f"{ratio}")
-        
-    
-ratio_tache_trajet(country)
+        table.append([employee_name, work_time_per_employee[k], travel_time_per_employee[k], ratio, len(tasks_id)])
+    for line in table:
+        texte.write("{};{};{};{};{};\n".format(line[0],line[1],line[2],line[3],line[4]))
+
+          
+solution_analysis(country)
             
 
