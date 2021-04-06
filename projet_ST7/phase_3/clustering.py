@@ -15,20 +15,23 @@ from gurobipy import *
 """ idées
 
 rajouter niveau et temps de travail disponible : done
-gérer les indisponibilités qui sont dasn plusieurs clusters : pas done du tout
+gérer les indisponibilités qui sont dans plusieurs clusters : inutile
+tester la réduction du déséquilibre : done
+comparer les durées des taches plutot que les unités : toDo
 
 """
 
 #parameters
 d_max_between_clusters = 50E3
-lambda_1 = 0.4
-lambda_2 = 0.6
+lambda_1 = 0.5
+lambda_2 = 7
 average_duration_task_done = 100
 show_levels = True
+show_employees_name = True
 
 
-def subdivise_problem(country, instance='2',reduce_unbalancing = True, plotting_solution = False):
-    employees, real_tasks = readingData(country,instance)
+def subdivise_problem(country, reduce_unbalancing = True, plotting_solution = False):
+    employees, real_tasks = readingData(country)
     number_of_employees = len(employees)-1
     depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",employees[k].Level,480,1440,[],0,k) for k in range(1,number_of_employees+1) ]
     employees_unavailabilities = [ TTask(-1,unavailability.Latitude, unavailability.Longitude, unavailability.End-unavailability.Start,"",0,unavailability.Start, unavailability.End,[],0,k)
@@ -54,7 +57,7 @@ def subdivise_problem(country, instance='2',reduce_unbalancing = True, plotting_
         useful_clusters = []
 
         nb_tasks_per_cluster = [ (labels[nb_clusters] == cluster).sum() for cluster in range(nb_clusters) ]
-        nb_levels_per_cluster = [ [sum([1 for i,task in enumerate(tasks) if labels[nb_clusters][i] == c and task.Level == l]) for l in range(1, level_max+1)] 
+        duration_levels_per_cluster = [ [sum([task.TaskDuration for i,task in enumerate(tasks) if labels[nb_clusters][i] == c and task.Level == l]) for l in range(1, level_max+1)] 
                                     for c in range(nb_clusters) ]
                 
 
@@ -88,10 +91,10 @@ def subdivise_problem(country, instance='2',reduce_unbalancing = True, plotting_
         for e in range(1, number_of_employees+1):
             for c in useful_clusters:
                 for l in range(1,level_max+1):
-                    a = quicksum([ DELTA[(e,c)]*(employees[e].Max_working_duration/average_duration_task_done) - sum(nb_levels_per_cluster[c][l2-1] for l2 in range(l,level_max+1))                                            
+                    a = quicksum([ DELTA[(e,c)]*employees[e].Max_working_duration - sum(duration_levels_per_cluster[c][l2-1] for l2 in range(l,level_max+1))                                            
                                     for e in range(1, number_of_employees+1) if employees[e].Level >= l ])            
-                    m.addConstr( -V[(c,l)] <= a )
-                    m.addConstr( a <= V[(c,l)] )        
+                    m.addConstr( -V[(c,l)] <= a / (level_max * average_duration_task_done) )
+                    m.addConstr( a / (level_max * average_duration_task_done) <= V[(c,l)] )        
 
         for e in range(1, number_of_employees+1):
             m.addConstr( quicksum( [ DELTA[(e,c)]*d[(e,c)] for c in useful_clusters]) <= d_max_between_clusters)
@@ -100,8 +103,8 @@ def subdivise_problem(country, instance='2',reduce_unbalancing = True, plotting_
         for c in useful_clusters:
             m.addConstr( quicksum( [ DELTA[(e,c)] for e in range(1, number_of_employees+1)]) >= 1) 
 
-        m.setObjective(quicksum([ lambda_1 * quicksum([ V[(c,l)] / max(1, nb_levels_per_cluster[c][l-1]) for l in range(1, level_max+1) ]) +
-                                  lambda_2 * quicksum([ d[(e,c)]*DELTA[(e,c)] / d_max for e in range(1, number_of_employees+1) ])
+        m.setObjective(quicksum([ lambda_1 * quicksum([ V[(c,l)] for l in range(1, level_max+1) ]) +
+                                  lambda_2 * quicksum([ d[(e,c)]*DELTA[(e,c)] / ((number_of_employees + 1)*d_max) for e in range(1, number_of_employees+1) ])
                                     for c in useful_clusters ]), GRB.MINIMIZE)
         m.update()
         m.optimize()
@@ -160,12 +163,12 @@ def subdivise_problem(country, instance='2',reduce_unbalancing = True, plotting_
             if i >= number_of_employees + len(employees_unavailabilities):
                 ax.scatter(task.X,task.Y,color = colors[labels[best_cluster][i] ])  
                 if show_levels:
-                    ax.annotate(labels[best_cluster][i], (task.X, task.Y))     
+                    ax.annotate(task.TaskDuration, (task.X, task.Y))     
         for i,task in enumerate(employees_unavailabilities):
                 ax.scatter(task.X,task.Y,marker = 'D',color = colors[labels[best_cluster][i + number_of_employees] ]) 
         for i,depot in enumerate(depots):
             ax.scatter(depot.X,depot.Y,marker='x',color = colors[labels[best_cluster][i] ])
-            if show_levels:
+            if show_employees_name:
                 ax.annotate(employees[depot.id_employee].EmployeeName, (depot.X, depot.Y))  
 
         plt.axis("equal")
@@ -180,6 +183,4 @@ def subdivise_problem(country, instance='2',reduce_unbalancing = True, plotting_
 
     return new_employees, new_tasks
 
-
-
-#subdivise_problem("Columbia", '3',reduce_unbalancing=True,True)
+employees, tasks = subdivise_problem("Romania", reduce_unbalancing=True, plotting_solution=True)
