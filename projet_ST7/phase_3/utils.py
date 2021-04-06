@@ -147,7 +147,19 @@ def sous_taches(tasks):
                 if end == tasks[i].ClosingTime:
                     break
 
-    return new_tasks
+    lst = []
+    pre = []
+    for task in new_tasks:
+        if task.OpeningTime + task.TaskDuration < task.ClosingTime:
+            lst.append(task)
+        else:
+            pre.append(task.TaskId)
+
+    for i in pre:
+        for j in range(len(lst)):
+            if lst[j].TaskId == i:
+                lst[j].number_of_sisters -= 1
+    return lst
 
 
 def score(DELTA,T,P,tasks,new_tasks,employees,country,phase=phase,instance=instance):
