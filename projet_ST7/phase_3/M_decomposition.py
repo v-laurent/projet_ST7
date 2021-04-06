@@ -25,17 +25,18 @@ from time import time
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Ukraine"
+country = "Romania"
 instance = '3'
 phase = '3'
 time_limit = 10     # maximum resolution time per employee (in second)
-cluster = True
+cluster = True      # use clustering or not
+employee_per_employee = True    # using gurobi on each employee or on each cluster
 
 
 
 
 if cluster:     # using clusters
-    employees, tasks = subdivise_problem(country, instance=instance, plotting_solution = False)   
+    employees, tasks = subdivise_problem(country, instance=instance, reduce_unbalancing=True, plotting_solution = True)   
     print("--- Clustering done !")
 
 else :          # with no cluster (ie one big cluster)
@@ -47,7 +48,7 @@ if cluster:
     number_of_clusters = len(tasks)
     real_tasks = [[] for c in range(number_of_clusters)]
     for c in range(number_of_clusters):
-        employees_c = [0] + employees[c]
+        employees_c = employees[c]
         number_of_employees_c = len(employees_c)-1
 
         nb_unavailabilities = 0
@@ -69,30 +70,28 @@ if cluster:
                 employees_c_unavailability_rank[k] = r
 
         number_of_fake_tasks = 1 + number_of_employees_c + nb_unavailabilities
-        real_tasks[c] = tasks[c][number_of_fake_tasks-1:]
+        real_tasks[c] = tasks[c][number_of_fake_tasks:]
 
-tasks = real_tasks
+    tasks = real_tasks
 
 
 
 ##***************************** Solving on each cluster ##*********************************
 
-def solving_all_clusters(employees, tasks, time_limit_per_employee=10):
-    number_of_clusters = len(employees)
-    obj_val_final, nb_tasks_done_final, number_of_fake_tasks_final, resolution_time_final = 0,0,1,0
+def solving_all_clusters(employees_c, tasks, time_limit_per_employee=10):
+    number_of_clusters = len(employees_c)
+    obj_val_final, nb_tasks_done_final, number_of_fake_tasks_final, resolution_time_final = 0,0,0,0
     employees_final, new_tasks_final = [0], [0]
     nb_of_employees_seen, nb_of_tasks_seen = 0,0
     DELTA_final, T_final, P_final = dict(), dict(), dict()
 
     for c in range(number_of_clusters):
-        employees_c = [0] + employees[c]
+        # preparing data
+        print(f"------------ Cluster {c} starting ------------")
+        employees_c = employees[c]
         number_of_employees_c = len(employees_c)-1
-
         tasks_c = [0] + tasks[c]
 
-        print(f"------------ Cluster {c} starting ------------")
-        # preparing data
-        depots_c = [ TTask(0,employees_c[k].Latitude, employees_c[k].Longitude,0,"",0,480,1440,[],0,k) for k in range(1,number_of_employees_c) ]
         print(f"Number of employees : {number_of_employees_c}")
         for k in range(1,number_of_employees_c+1):
             print(f"-- {employees_c[k].EmployeeName}")
@@ -100,7 +99,33 @@ def solving_all_clusters(employees, tasks, time_limit_per_employee=10):
             print(tasks_c[i].TaskId)
 
         # solving on one cluster
-        (DELTA_c,T_c,P_c,new_tasks_c,nb_unavailabilities_c, obj_val_c,nb_tasks_done_c,number_of_fake_tasks_c,resolution_time_c) = solving_one_cluster(employees_c, tasks_c, time_limit_per_employee)
+        if employee_per_employee:
+            (DELTA_c,T_c,P_c,new_tasks_c, obj_val_c,nb_tasks_done_c,number_of_fake_tasks_c,resolution_time_c) = solving_one_cluster(employees_c, tasks_c, time_limit_per_employee)
+        
+        ############ using gurobi only #############
+        else:
+            number_of_employees_c = len(employees_c)-1
+            nb_unavailabilities = 0
+            for employee in employees_c[1:]:
+                nb_unavailabilities += len(employee.Unavailabilities)
+
+            depots = [ TTask(0,employees_c[k].Latitude, employees_c[k].Longitude,0,"",0,480,1440,[],0,k) for k in range(1,number_of_employees_c+1) ]
+            employees_c_unavailability=[]
+            for k in range(1,number_of_employees_c+1):
+                for l in range(len(employees_c[k].Unavailabilities)): #if the employee has unavailabilities
+                    employees_c_unavailability.append(TTask(-1,employees_c[k].Unavailabilities[l].Latitude, employees_c[k].Unavailabilities[l].Longitude, 
+                                    employees_c[k].Unavailabilities[l].End-employees_c[k].Unavailabilities[l].Start,
+                                    "",0,employees_c[k].Unavailabilities[l].Start, employees_c[k].Unavailabilities[l].End,
+                                    [],0,k))
+    
+            new_tasks_c = [0]+ depots + employees_c_unavailability + sous_taches(tasks_c)
+            number_of_fake_tasks_c = 1 + len(depots) + nb_unavailabilities
+            
+            initial_time = time()
+            DELTA_c, T_c, P_c, obj_val_c, nb_tasks_done_c = best_solution(employees_c, new_tasks_c, number_of_fake_tasks_c, 0, TimeLimit=time_limit_per_employee*number_of_employees_c)
+            resolution_time_c = time() - initial_time
+        ############ END #############
+
 
         # update final variable
         obj_val_final += obj_val_c
@@ -115,8 +140,6 @@ def solving_all_clusters(employees, tasks, time_limit_per_employee=10):
                 for j in range(1,len(new_tasks_c)):
                     j_final = nb_of_tasks_seen + j
                     DELTA_final[(i_final,j_final,k_final)] = DELTA_c[(i,j,k)]
-                    if DELTA_c[(i,j,k)]==1:
-                        print((i,j,k))
                 T_final[(k_final,i_final)] = T_c[(k,i)]
                 P_final[(k_final,i_final)] = P_c[(k,i)]
         
@@ -135,12 +158,6 @@ def solving_all_clusters(employees, tasks, time_limit_per_employee=10):
             if (k,i) not in T_final.keys():
                 T_final[(k,i)] = 0
                 P_final[(k,i)] = 0
-
-    for k in range(1,nb_of_employees_seen+1):
-        s=0
-        for i in range(1,nb_of_tasks_seen+1):
-            s += P_final[(k,i)]
-        print(s)
 
     # print objective
     nb_total_real_tasks = 0
@@ -227,17 +244,26 @@ def solving_one_cluster(employees, tasks, time_limit_per_employee=10):
                             chosen_subtasks_indices.append(i)
 
         chosen_depot = depots[k1]
-        #chosen_depot = TTask(0,employees[k1].Latitude, employees[k1].Longitude,0,"",0,480,1440,[],0,k1)
         chosen_depot.id_employee = 1
         chosen_tasks = [0] + [chosen_depot] + employee_unavailability + chosen_subtasks
         chosen_number_of_fake_tasks = 1 + 1 + len(employee_unavailability)
         number_of_tasks = len(chosen_tasks)-1
 
         # subproblem exact resolution
-        DELTA_k, T_k, P_k, obj_val_k, nb_task_done_k = best_solution([[],chosen_employee], chosen_tasks, chosen_number_of_fake_tasks, 0, TimeLimit=time_limit_per_employee)
+        result = best_solution([[],chosen_employee], chosen_tasks, chosen_number_of_fake_tasks, 0, TimeLimit=time_limit_per_employee)
+        if result != None:
+            DELTA_k, T_k, P_k, obj_val_k, nb_task_done_k = result
+        else:
+            continue
 
 
         # update final variables
+        print(chosen_employee.EmployeeName)
+        for i in range(1,number_of_tasks+1):
+            for j in range(1,number_of_tasks+1):
+                if DELTA_k[(i,j,1)]==1:
+                    print(chosen_tasks[i].TaskId)
+
         obj_val += obj_val_k
         nb_task_done += nb_task_done_k
         for i in range(1,number_of_tasks+1):
@@ -277,7 +303,7 @@ def solving_one_cluster(employees, tasks, time_limit_per_employee=10):
 
     resolution_time = time()-initial_time
     
-    return(DELTA,T,P,new_tasks,nb_unavailabilities, obj_val, nb_task_done, number_of_fake_tasks, resolution_time)
+    return(DELTA,T,P,new_tasks, obj_val, nb_task_done, number_of_fake_tasks, resolution_time)
 
 
 

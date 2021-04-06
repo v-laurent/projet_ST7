@@ -4,19 +4,21 @@ from classes import *
 from utils import *
 from reading_data import *
 import matplotlib.pyplot as plt
+from  matplotlib.colors import cnames
 
 #################################################
-country = 'Austria'
+country = 'Romania'
+instance = '3'
 phase = '3'
 dossier_txt = 'fichiers_txt_phase'+phase
-version = 'V2ByV'+phase
+version = 'V'+instance+'ByV'+phase
 #################################################
 # chosen accuracy for the warning (in minutes)
 epsilon = 1
 
 
-def verification(country, epsilon=0.05):
-    employees,tasks = readingData(country)          # the depot is not in tasks
+def verification(country, instance, epsilon=0.05):
+    employees,tasks = readingData(country,instance)          # the depot is not in tasks
     number_of_employees = len(employees)-1
     number_of_tasks = len(tasks)-1
     
@@ -154,8 +156,8 @@ def verification(country, epsilon=0.05):
 
 ##############################################################
 # GANTT DIAGRAM
-def gantt_diagram(country):
-    employees,tasks = readingData(country)          # depot is not a task
+def gantt_diagram(country, instance):
+    employees,tasks = readingData(country, instance)          # depot is not a task
     employees = employees[1:]
     tasks = tasks[1:]
     number_of_employees = len(employees)
@@ -234,9 +236,9 @@ def gantt_diagram(country):
             unavailabilities_times[k].append((unavailability.Start, unavailability.End-unavailability.Start))
 
 
-    colors=['orange','pink','purple','cyan','olive','brown']
+    colors = ['orange','pink','purple','cyan','olive','brown'] + [key for key,c in cnames.items()]
     for i in range(len(employees)):
-        gnt.broken_barh(task_times[i],(10*(i+1)-1,2), facecolors=('tab:{}'.format(colors[i])))
+        gnt.broken_barh(task_times[i],(10*(i+1)-1,2), facecolors=colors[i])
         gnt.broken_barh(travel_times[i],(10*(i+1)-2,0.5),facecolors=('tab:red'))
         gnt.broken_barh(lunch_times[i],(10*(i+1)-3,0.5),facecolors=('tab:green'))
         gnt.broken_barh(unavailabilities_times[i],(10*(i+1)-3,0.5),facecolors=('tab:blue'))
@@ -267,13 +269,13 @@ def gantt_diagram(country):
                     blab.broken_barh([(int(T_i_startTime[0]), tasks[i].TaskDuration)],(10*(i+1)-1,3),facecolors=(f'tab:red'))
 
         if len(tasks[i].Unavailabilities) == 0:
-            blab.broken_barh([(tasks[i].OpeningTime,tasks[i].ClosingTime-tasks[i].OpeningTime)],(10*(i+1)-1,2),facecolors=(f'tab:{color}'))
+            blab.broken_barh([(tasks[i].OpeningTime,tasks[i].ClosingTime-tasks[i].OpeningTime)],(10*(i+1)-1,2),facecolors=color)
         else :
             start_time = tasks[i].OpeningTime
             for unavailability in tasks[k].Unavailabilities:
-                blab.broken_barh([(start_time,unavailability.Start-start_time)],(10*(i+1)-1,2),facecolors=(f'tab:{color}'))
+                blab.broken_barh([(start_time,unavailability.Start-start_time)],(10*(i+1)-1,2),facecolors=color)
                 start_time = unavailability.End
-            blab.broken_barh([(start_time,tasks[i].ClosingTime-start_time)],(10*(i+1)-1,2),facecolors=(f'tab:{color}'))
+            blab.broken_barh([(start_time,tasks[i].ClosingTime-start_time)],(10*(i+1)-1,2),facecolors=color)
 
     plt.savefig('gantt_phase3/{}_tasks.png'.format(country))
 
@@ -281,5 +283,5 @@ def gantt_diagram(country):
 
 
 
-verification(country, epsilon)
-gantt_diagram(country)
+verification(country, instance, epsilon)
+gantt_diagram(country, instance)

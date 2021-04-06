@@ -30,8 +30,8 @@ show_levels = True
 show_employees_name = True
 
 
-def subdivise_problem(country, reduce_unbalancing = True, plotting_solution = False):
-    employees, real_tasks = readingData(country)
+def subdivise_problem(country, instance,reduce_unbalancing = True, plotting_solution = False):
+    employees, real_tasks = readingData(country,instance)
     number_of_employees = len(employees)-1
     depots = [ TTask(0,employees[k].Latitude, employees[k].Longitude,0,"",employees[k].Level,480,1440,[],0,k) for k in range(1,number_of_employees+1) ]
     employees_unavailabilities = [ TTask(-1,unavailability.Latitude, unavailability.Longitude, unavailability.End-unavailability.Start,"",0,unavailability.Start, unavailability.End,[],0,k)
@@ -192,4 +192,6 @@ def subdivise_problem(country, reduce_unbalancing = True, plotting_solution = Fa
 
     return new_employees, new_tasks
 
-employees, tasks = subdivise_problem("Ukraine", reduce_unbalancing=True, plotting_solution=True)
+
+
+#subdivise_problem("Columbia", '3',reduce_unbalancing=True, plotting_solution=True)
