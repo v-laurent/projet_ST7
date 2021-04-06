@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from  matplotlib.colors import cnames
 
 #################################################
-country = 'Ukraine'
+country = 'Romania'
 instance = '3'
 phase = '3'
 dossier_txt = 'fichiers_txt_phase'+phase

@@ -194,4 +194,4 @@ def subdivise_problem(country, instance,reduce_unbalancing = True, plotting_solu
 
 
 
-subdivise_problem("Columbia", '3',reduce_unbalancing=True, plotting_solution=True)
+#subdivise_problem("Columbia", '3',reduce_unbalancing=True, plotting_solution=True)

@@ -25,10 +25,10 @@ from time import time
 
 ##***************************** Reading Data  ##*********************************
 
-country = "Ukraine"
+country = "Romania"
 instance = '3'
 phase = '3'
-time_limit = 60     # maximum resolution time per employee (in second)
+time_limit = 10     # maximum resolution time per employee (in second)
 cluster = True      # use clustering or not
 employee_per_employee = True    # using gurobi on each employee or on each cluster
 
@@ -36,7 +36,7 @@ employee_per_employee = True    # using gurobi on each employee or on each clust
 
 
 if cluster:     # using clusters
-    employees, tasks = subdivise_problem(country, instance=instance, reduce_unbalancing=True, plotting_solution = False)   
+    employees, tasks = subdivise_problem(country, instance=instance, reduce_unbalancing=True, plotting_solution = True)   
     print("--- Clustering done !")
 
 else :          # with no cluster (ie one big cluster)
@@ -250,7 +250,11 @@ def solving_one_cluster(employees, tasks, time_limit_per_employee=10):
         number_of_tasks = len(chosen_tasks)-1
 
         # subproblem exact resolution
-        DELTA_k, T_k, P_k, obj_val_k, nb_task_done_k = best_solution([[],chosen_employee], chosen_tasks, chosen_number_of_fake_tasks, 0, TimeLimit=time_limit_per_employee)
+        result = best_solution([[],chosen_employee], chosen_tasks, chosen_number_of_fake_tasks, 0, TimeLimit=time_limit_per_employee)
+        if result != None:
+            DELTA_k, T_k, P_k, obj_val_k, nb_task_done_k = result
+        else:
+            continue
 
 
         # update final variables
